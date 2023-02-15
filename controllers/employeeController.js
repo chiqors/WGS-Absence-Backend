@@ -1,44 +1,39 @@
-const index = async(req, res) => {
-    console.log('GET /employee');
-    res.send('GET /employee');
-};
+import Employee from '../models/employeeModel.js';
 
-const create = async(req, res) => {
-    console.log('GET /employee/create');
-    res.send('GET /employee/create');
+const index = async(req, res) => {
+    const data = await Employee.getAllEmployees();
+    if (data.rows.length > 0) {
+        res.json(data.rows);
+    } else {
+        res.status(404).json({ message: 'Data not found' });
+    }
 };
 
 const store = async(req, res) => {
-    console.log('POST /employee');
-    res.send('POST /employee');
+    await Employee.storeEmployee(req.body);
 }
 
 const show = async(req, res) => {
-    console.log('GET /employee/show/:id');
-    res.send('GET /employee/show/:id');
-}
-
-const edit = async(req, res) => {
-    console.log('GET /employee/edit/:id');
-    res.send('GET /employee/edit/:id');
+    const data = await Employee.getEmployeeById(req.params.id);
+    if (data.rows.length > 0) {
+        res.json(data.rows);
+    } else {
+        res.status(404).json({ message: 'Data not found' });
+    }
 }
 
 const update = async(req, res) => {
-    console.log('PUT /employee/:id');
-    res.send('PUT /employee/:id');
+    await Employee.updateEmployee(req.body);
 }
 
 const destroy = async(req, res) => {
-    console.log('DELETE /employee/:id');
-    res.send('DELETE /employee/:id');
+    await Employee.deleteEmployee(req.params.id);
 }
 
 export default {
     index,
-    create,
     store,
     show,
-    edit,
     update,
     destroy
 };

@@ -4,16 +4,27 @@ import employeeController from '../controllers/employeeController.js';
 // Global variables
 const router = express.Router();
 
+// Testing API routes
 router.get('/', (req, res) => {
     console.log('GET /api');
     res.send('GET /api');
 });
+router.post('/', (req, res) => {
+    console.log('POST /api');
+    res.send('POST /api');
+});
+router.put('/', (req, res) => {
+    console.log('PUT /api');
+    res.send('PUT /api');
+});
+router.delete('/', (req, res) => {
+    console.log('DELETE /api');
+    res.send('DELETE /api');
+});
 
 router.get('/employee', employeeController.index);
-router.get('/employee/create', employeeController.create);
 router.post('/employee', employeeController.store);
-router.get('/employee/show/:id', employeeController.show);
-router.get('/employee/edit/:id', employeeController.edit);
+router.get('/employee/:id', employeeController.show);
 router.put('/employee/:id', employeeController.update);
 router.delete('/employee/:id', employeeController.destroy);
 
