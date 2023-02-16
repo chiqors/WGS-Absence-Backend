@@ -1,11 +1,14 @@
 import Employee from '../models/employeeModel.js';
+import logger from '../utils/logger.js';
 
 const index = async(req, res) => {
     const data = await Employee.getAllEmployees();
     if (data.rows.length > 0) {
         res.json(data.rows);
     } else {
-        res.status(404).json({ message: 'Data not found' });
+        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+        logger.saveErrorLog('Employee List Empty', fullUrl, 'GET', 404);
+        res.status(404).json({ message: 'Data is Empty' });
     }
 };
 
@@ -18,6 +21,8 @@ const show = async(req, res) => {
     if (data.rows.length > 0) {
         res.json(data.rows);
     } else {
+        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+        logger.saveErrorLog('Employee not found', fullUrl, 'GET', 404);
         res.status(404).json({ message: 'Data not found' });
     }
 }
