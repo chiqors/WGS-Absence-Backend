@@ -1,6 +1,17 @@
 import Employee from '../models/employeeModel.js';
 import logger from '../utils/logger.js';
 
+const login = async(req, res) => {
+    const data = await Employee.checkAuth(req.body.username, req.body.password);
+    if (data.rows.length > 0) {
+        res.json(data.rows);
+    } else {
+        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+        logger.saveErrorLog('Failed to do authentication', fullUrl, 'POST', 404);
+        res.status(404).json({ message: 'Failed to do authentication' });
+    }
+}
+
 const index = async(req, res) => {
     const data = await Employee.getAllEmployees();
     if (data.rows.length > 0) {
@@ -36,6 +47,7 @@ const destroy = async(req, res) => {
 }
 
 export default {
+    login,
     index,
     store,
     show,

@@ -22,6 +22,10 @@ router.delete('/', (req, res) => {
     res.send('DELETE /api');
 });
 
+// Auth
+router.post('/login', employeeController.login);
+
+// Employee API routes
 router.get('/employee', employeeController.index);
 router.post('/employee', employeeController.store);
 router.get('/employee/:id', employeeController.show);

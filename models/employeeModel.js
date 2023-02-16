@@ -14,6 +14,13 @@ const getEmployeeByName = async (name) => {
     );
 }
 
+const checkAuth = async (username, password) => {
+    return await db.query(
+        `SELECT * FROM employees WHERE username = $1 AND password = $2`,
+        [username, password]
+    );
+}
+
 const getAllEmployees = async () => {
     return await db.query(
         `SELECT * FROM employees`
@@ -43,6 +50,7 @@ const deleteEmployee = async (id) => {
 export default {
     getEmployeeById,
     getEmployeeByName,
+    checkAuth,
     getAllEmployees,
     storeEmployee,
     updateEmployee,
