@@ -1,0 +1,12 @@
+This is what Multer API does with multipart/form-data
+
+{
+  fieldname: 'uploaded_file',
+  originalname: '68eb889c-e6e9-4f5a-921a-fb9435f149ff.jpg',
+  encoding: '7bit',
+  mimetype: 'image/jpeg',
+  destination: 'uploads/',
+  filename: 'c48a72a64c24cd8283800a3f52fb6e78',
+  path: 'uploads\\c48a72a64c24cd8283800a3f52fb6e78',
+  size: 70535
+}

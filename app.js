@@ -1,9 +1,9 @@
 // Depedencies & Libraries
 import express from 'express';
-import rfs from 'rotating-file-stream';
 import morgan from 'morgan';
 import bodyParser from "body-parser";
 import * as dotenv from 'dotenv'
+import cors from 'cors';
 
 // Routes
 import apiRouter from './routes/api.js';
@@ -28,6 +28,12 @@ app.use(morgan('combined', { stream: logger.saveMorganLog() }))
 app.use(bodyParser.json())
 // support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({ extended: true }))
+
+// Static files
+app.use(express.static('public'));
+
+// CORS
+app.use(cors());
 
 // Routing
 app.use('/api', apiRouter);
