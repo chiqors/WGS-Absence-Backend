@@ -44,7 +44,6 @@ const store = async(req, res) => {
         const fullPublicUrl = `${process.env.UPLOAD_FOLDER || '/uploads'}/${req.body.username}/${req.file.filename}`
         req.body.photo_url = fullPublicUrl
     }
-    console.log(req.body)
     await Employee.storeEmployee(req.body).catch((err) => {
         const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
         logger.saveErrorLog(err, fullUrl, 'POST', 500);

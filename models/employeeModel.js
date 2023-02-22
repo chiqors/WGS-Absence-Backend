@@ -51,8 +51,8 @@ const countAllEmployees = async () => {
 
 const storeEmployee = async (employee) => {
     return await db.query(
-        `INSERT INTO employees (full_name, gender, phone, address, birthdate, photo_url, username, password) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-        [employee.full_name, employee.gender, employee.phone, employee.address, employee.birthdate, employee.photo_url, employee.username, employee.password]
+        `INSERT INTO employees (full_name, gender, phone, address, birthdate, photo_url, username, password, email, job_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+        [employee.full_name, employee.gender, employee.phone, employee.address, employee.birthdate, employee.photo_url, employee.username, employee.password, employee.email, employee.job_id]
     )
 }
 
