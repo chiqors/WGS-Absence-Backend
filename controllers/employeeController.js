@@ -55,7 +55,7 @@ const store = async(req, res) => {
 const show = async(req, res) => {
     const data = await Employee.getEmployeeById(req.params.id);
     if (data.rows.length > 0) {
-        res.json(data.rows);
+        res.json(data.rows[0]);
     } else {
         const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
         logger.saveErrorLog('Employee not found', fullUrl, 'GET', 404);
@@ -64,7 +64,22 @@ const show = async(req, res) => {
 }
 
 const update = async(req, res) => {
-    await Employee.updateEmployee(req.body);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+        logger.saveErrorLog('Validation Error', fullUrl, 'PUT', 422);
+        return res.status(422).json({ errors: errors.array() });
+    }
+    if (req.file) {
+        const fullPublicUrl = `${process.env.UPLOAD_FOLDER || '/uploads'}/${req.body.username}/${req.file.filename}`
+        req.body.photo_url = fullPublicUrl
+    }
+    await Employee.updateEmployee(req.body).catch((err) => {
+        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+        logger.saveErrorLog(err, fullUrl, 'POST', 500);
+        res.status(500).json({ message: 'Internal Server Error' });
+    });
+    return res.status(201).json({ message: 'updated' });
 }
 
 const destroy = async(req, res) => {

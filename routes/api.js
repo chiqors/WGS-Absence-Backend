@@ -1,7 +1,7 @@
 import express from 'express';
 
 // Import Handler for API routes
-import { validateCreateEmployee } from '../handler/formValidation.js';
+import { validateCreateEmployee, validateEditEmployee } from '../handler/formValidation.js';
 import { avatarUpload } from '../handler/fileUpload.js';
 
 // Import Controllers for API routes
@@ -43,7 +43,7 @@ router.post('/login', employeeController.login);
 router.get('/employee', employeeController.index);
 router.post('/employee', avatarUpload.single('photo_url'), validateCreateEmployee, employeeController.store);
 router.get('/employee/:id', employeeController.show);
-router.put('/employee/:id', avatarUpload.single('photo_url'), employeeController.update);
+router.put('/employee/:id', avatarUpload.single('photo_url'), validateEditEmployee, employeeController.update);
 router.delete('/employee/:id', employeeController.destroy);
 
 // Job API routes

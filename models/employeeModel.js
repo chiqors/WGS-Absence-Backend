@@ -36,7 +36,7 @@ const getAllEmployeesWithLimitAndOffset = async (limit, offset) => {
 
 const getAllEmployeesWithLimitOffsetAndRelationWithJobs = async (limit, offset) => {
     return await db.query(
-        `SELECT employees.*, jobs.title AS job_title FROM employees JOIN jobs ON employees.job_id = jobs.id LIMIT $1 OFFSET $2`,
+        `SELECT employees.*, jobs.title AS job_title FROM employees JOIN jobs ON employees.job_id = jobs.id ORDER BY employees.id DESC LIMIT $1 OFFSET $2`,
         [limit, offset]
     );
 }
@@ -57,8 +57,20 @@ const storeEmployee = async (employee) => {
 }
 
 const updateEmployee = async (employee) => {
+    // update query based on available data
+    let query = `UPDATE employees SET `
+    let params = []
+    Array.from(Object.keys(employee)).forEach((key, index) => {
+        if (employee[key] !== undefined) {
+            query += `${key} = $${index + 1}, `
+            params.push(employee[key])
+        }
+    })
+    query = query.slice(0, -2) + ` WHERE id = $${params.length + 1} RETURNING id`
+    params.push(employee.id)
     return await db.query(
-        `UPDATE employees SET full_name = '${employee.full_name}', gender = '${employee.gender}', phone = '${employee.phone}', address = '${employee.address}', birthdate = '${employee.birthdate}', photo_url = '${employee.photo_url}', username = '${employee.username}', password = '${employee.password}' WHERE id = ${employee.id}`
+        query,
+        params
     );
 }
 
