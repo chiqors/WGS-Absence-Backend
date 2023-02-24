@@ -1,6 +1,7 @@
 import { validationResult } from 'express-validator';
 import Employee from '../models/employeeModel.js';
 import logger from '../utils/logger.js';
+import fs from 'fs';
 
 const login = async(req, res) => {
     const data = await Employee.checkAuth(req.body.username, req.body.password);
@@ -47,7 +48,7 @@ const store = async(req, res) => {
     await Employee.storeEmployee(req.body).catch((err) => {
         const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
         logger.saveErrorLog(err, fullUrl, 'POST', 500);
-        res.status(500).json({ message: 'Internal Server Error' });
+        return res.status(500).json({ message: 'Internal Server Error' });
     });
     return res.status(201).json({ message: 'submitted' });
 }
@@ -70,20 +71,46 @@ const update = async(req, res) => {
         logger.saveErrorLog('Validation Error', fullUrl, 'PUT', 422);
         return res.status(422).json({ errors: errors.array() });
     }
+    const old_data = await Employee.getEmployeeById(req.params.id);
     if (req.file) {
+        if (req.body.username !== old_data.rows[0].username) {
+            // delete old avatar and folder
+            if (fs.existsSync(`public/uploads/${old_data.rows[0].username}`)) {
+                fs.rm(`public/uploads/${old_data.rows[0].username}`, { recursive: true });
+                console.log('avatar and user folder has been deleted')
+            }
+        }
         const fullPublicUrl = `${process.env.UPLOAD_FOLDER || '/uploads'}/${req.body.username}/${req.file.filename}`
         req.body.photo_url = fullPublicUrl
     }
     await Employee.updateEmployee(req.body).catch((err) => {
         const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
         logger.saveErrorLog(err, fullUrl, 'POST', 500);
-        res.status(500).json({ message: 'Internal Server Error' });
+        return res.status(500).json({ message: 'Internal Server Error' });
     });
     return res.status(201).json({ message: 'updated' });
 }
 
 const destroy = async(req, res) => {
-    await Employee.deleteEmployee(req.params.id);
+    const paramsId = req.params.id;
+    const data = await Employee.getEmployeeById(paramsId);
+    if (data.rows.length > 0) {
+        const username = data.rows[0].username;
+        if (fs.existsSync(`public/uploads/${username}`)) {
+            fs.rm(`public/uploads/${username}`, { recursive: true });
+            console.log('avatar and user folder has been deleted')
+        }
+        await Employee.deleteEmployee(paramsId).catch((err) => {
+            const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+            logger.saveErrorLog(err, fullUrl, 'DELETE', 500);
+            res.status(500).json({ message: 'Internal Server Error' });
+        });
+        return res.status(201).json({ message: 'deleted' });
+    } else {
+        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+        logger.saveErrorLog('Employee not found', fullUrl, 'DELETE', 404);
+        res.status(404).json({ message: 'Data not found' });
+    }
 }
 
 export default {
