@@ -1,9 +1,9 @@
 import db from '../utils/db.js';
 import { faker } from '@faker-js/faker';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import helper from '../handler/helper.js';
 faker.locale = 'id_ID'; 
-moment.locale('id');
+dayjs.locale('id');
 
 const createRandomUser = async() => {
     return Promise.resolve({
@@ -14,7 +14,7 @@ const createRandomUser = async() => {
         phone: faker.phone.number('08##########'),
         address: faker.address.streetAddress(true),
         photo_url: faker.image.avatar(),
-        birthdate: moment(faker.date.birthdate({
+        birthdate: dayjs(faker.date.birthdate({
             min: 20,
             max: 25,
             mode: 'age'

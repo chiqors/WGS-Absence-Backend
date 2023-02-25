@@ -4,10 +4,10 @@ specifiers:
   '@faker-js/faker': ^7.6.0
   body-parser: ^1.20.1
   cors: ^2.8.5
+  dayjs: ^1.11.7
   dotenv: ^16.0.3
   express: ^4.18.2
   express-validator: ^6.15.0
-  moment: ^2.29.4
   morgan: ^1.10.0
   multer: ^1.4.5-lts.1
   pg: ^8.9.0
@@ -16,10 +16,10 @@ specifiers:
 dependencies:
   body-parser: 1.20.1
   cors: 2.8.5
+  dayjs: 1.11.7
   dotenv: 16.0.3
   express: 4.18.2
   express-validator: 6.15.0
-  moment: 2.29.4
   morgan: 1.10.0
   multer: 1.4.5-lts.1
   pg: 8.9.0
@@ -147,6 +147,10 @@ packages:
     dependencies:
       object-assign: 4.1.1
       vary: 1.1.2
+    dev: false
+
+  /dayjs/1.11.7:
+    resolution: {integrity: sha512-+Yw9U6YO5TQohxLcIkrXBeY73WP3ejHWVvx8XCk3gxvQDCTEmS48ZrSZCKciI7Bhl/uCMyxYtE9UqRILmFphkQ==}
     dev: false
 
   /debug/2.6.9:
@@ -365,10 +369,6 @@ packages:
     hasBin: true
     dependencies:
       minimist: 1.2.8
-    dev: false
-
-  /moment/2.29.4:
-    resolution: {integrity: sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==}
     dev: false
 
   /morgan/1.10.0:
