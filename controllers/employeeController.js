@@ -3,6 +3,7 @@ import Employee from '../models/employeeModel.js';
 import logger from '../utils/logger.js';
 import fs from 'fs';
 import axios from 'axios';
+import jwt_decode from 'jwt-decode';
 
 const login = async(req, res) => {
     const data = await Employee.checkAuth(req.body.username, req.body.password);
@@ -17,16 +18,23 @@ const login = async(req, res) => {
 }
 
 const googleOauth = async(req, res) => {
-    const accessToken = req.body.accessToken;
-    const resp = await axios(
-    "https://www.googleapis.com/oauth2/v3/userinfo",
-    {
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-        },
-    });
-    console.log(resp.data);
-    const data = await Employee.checkGoogleOauth(resp.data.email);
+    let data = null;
+    if (req.body.accessToken) {
+        const accessToken = req.body.accessToken;
+        const resp = await axios(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+        data = await Employee.checkGoogleOauth(resp.data.email);
+    }
+    if (req.body.credential) {
+        const credential = req.body.credential;
+        const decoded = jwt_decode(credential);
+        data = await Employee.checkGoogleOauth(decoded.email);
+    }
     if (data) {
         res.status(200).json({ message: 'You are successfully logged in' });
     } else {
