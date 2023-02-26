@@ -59,7 +59,9 @@ const checkAuth = async (username, password) => {
 const checkGoogleOauth = async (email) => {
     const account = await prisma.account.findFirst({
         where: {
-            email: email
+            email: email,
+            verified: true,
+            provider: 'google'
         },
         include: {
             employee: true
