@@ -38,6 +38,7 @@ router.post('/upload', avatarUpload.single('uploaded_file'), function (req, res)
 });
 
 // Auth
+router.post('/google-oauth', employeeController.googleOauth);
 router.post('/login', employeeController.login);
 
 // Employee API routes

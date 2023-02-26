@@ -42,15 +42,32 @@ const getEmployeeByName = async (name) => {
 }
 
 const checkAuth = async (username, password) => {
-    const employee = await prisma.employee.findFirst({
+    const account = await prisma.account.findFirst({
         where: {
             username: username,
             password: password
+        },
+        include: {
+            employee: true
         }
     }).finally(async () => {
         await prisma.$disconnect()
     })
-    return employee
+    return account;
+}
+
+const checkGoogleOauth = async (email) => {
+    const account = await prisma.account.findFirst({
+        where: {
+            email: email
+        },
+        include: {
+            employee: true
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return account;
 }
 
 const getAllEmployees = async () => {
@@ -201,6 +218,7 @@ export default {
     getEmployeeById,
     getEmployeeByName,
     checkAuth,
+    checkGoogleOauth,
     getAllEmployees,
     getAllEmployeesWithLimitAndOffset,
     getAllEmployeesWithLimitOffsetAndRelationWithJobs,

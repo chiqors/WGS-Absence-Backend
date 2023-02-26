@@ -2,17 +2,40 @@ import { validationResult } from 'express-validator';
 import Employee from '../models/employeeModel.js';
 import logger from '../utils/logger.js';
 import fs from 'fs';
+import axios from 'axios';
 
 const login = async(req, res) => {
     const data = await Employee.checkAuth(req.body.username, req.body.password);
-    if (data.rows.length > 0) {
-        res.json(data.rows);
+    console.log(data);
+    if (data) {
+        res.status(200).json({ message: 'You are successfully logged in' });
     } else {
         const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-        logger.saveErrorLog('Failed to do authentication', fullUrl, 'POST', 404);
-        res.status(404).json({ message: 'Failed to do authentication' });
+        logger.saveErrorLog('Username and Password are invalid', fullUrl, 'POST', 404);
+        res.status(404).json({ message: 'Username and Password are invalid' });
     }
 }
+
+const googleOauth = async(req, res) => {
+    const accessToken = req.body.accessToken;
+    const resp = await axios(
+    "https://www.googleapis.com/oauth2/v3/userinfo",
+    {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+    console.log(resp.data);
+    const data = await Employee.checkGoogleOauth(resp.data.email);
+    if (data) {
+        res.status(200).json({ message: 'You are successfully logged in' });
+    } else {
+        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+        logger.saveErrorLog('Your Google Account does not registered', fullUrl, 'POST', 404);
+        res.status(404).json({ message: 'Your Google Account does not registered' });
+    }
+}
+    
 
 const index = async(req, res) => {
     // parse query string to get limit and offset
@@ -126,6 +149,7 @@ const destroy = async(req, res) => {
 
 export default {
     login,
+    googleOauth,
     index,
     store,
     show,
