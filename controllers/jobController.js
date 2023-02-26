@@ -2,8 +2,8 @@ import Job from '../models/jobModel.js';
 
 const index = async(req, res) => {
     const data = await Job.getAllJobs();
-    if (data.rows.length > 0) {
-        res.json(data.rows);
+    if (data.length > 0) {
+        res.json(data);
     } else {
         res.status(404).json({ message: 'Data not found' });
     }

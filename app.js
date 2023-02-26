@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import bodyParser from "body-parser";
 import dotenv from 'dotenv'
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 // Routes
 import apiRouter from './routes/api.js';
@@ -17,23 +18,25 @@ const app = express();
 const port = process.env.PORT || 3000;
 dotenv.config();
 
-// Middleware for parsing JSON and urlencoded data
+// 1. Middleware for parsing JSON and urlencoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// setup the logger
+// 2. Cookie Parser
+app.use(cookieParser());
+
+// 3. setup the logger
 app.use(morgan('combined', { stream: logger.saveMorganLog() }))
 
-// support parsing of application/json type post data
+// 4. CORS
+app.use(cors());
+
+// 5. support parsing of application/json type post data
 app.use(bodyParser.json())
-// support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({ extended: true }))
 
-// Static files
+// 6. Static files
 app.use(express.static('public'));
-
-// CORS
-app.use(cors());
 
 // Routing
 app.use('/api', apiRouter);

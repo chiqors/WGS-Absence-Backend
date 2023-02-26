@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enum Data
+
+enum Gender {
+  male
+  female
+}
+
+enum DurationType {
+  full_time
+  bussiness_trip
+}
+
+enum Role {
+  admin
+  employee
+}
+
+enum DutyStatus {
+  not_assigned
+  assigned
+  need_discussion
+  completed
+}
+
+// Model Data
+
+model Job {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String
+  created_at  DateTime @default(now()) @db.Date
+  updated_at  DateTime @default(now()) @db.Date
+
+  employee Employee[]
+  duty     Duty[]
+
+  @@map("jobs")
+}
+
+model Duty {
+  id            Int          @id @default(autoincrement())
+  job_id        Int
+  name          String       @unique
+  description   String
+  duration_type DurationType @default(full_time)
+  status        DutyStatus   @default(not_assigned)
+  created_at    DateTime     @default(now()) @db.Date
+  updated_at    DateTime     @default(now()) @db.Date
+
+  job        Job          @relation(fields: [job_id], references: [id])
+  Attendance Attendance[]
+
+  @@map("duties")
+}
+
+model Attendance {
+  id          Int      @id @default(autoincrement())
+  employee_id Int
+  duty_id     Int
+  time_in     DateTime @default(now()) @db.Timestamptz(3)
+  time_out    DateTime @default(now()) @db.Timestamptz(3)
+
+  employee Employee @relation(fields: [employee_id], references: [id])
+  duty     Duty     @relation(fields: [duty_id], references: [id])
+
+  @@map("attendances")
+}
+
+model Employee {
+  id        Int      @id @default(autoincrement())
+  job_id    Int
+  full_name String
+  gender    Gender   @default(male)
+  phone     String   @unique
+  address   String
+  birthdate DateTime @db.Date
+  joined_at DateTime @default(now()) @db.Date
+  photo_url String
+
+  job        Job          @relation(fields: [job_id], references: [id])
+  attendance Attendance[]
+  account    Account?
+
+  @@map("employees")
+}
+
+model Account {
+  id          String   @id @default(uuid())
+  employee_id Int      @unique
+  email       String   @unique
+  username    String   @unique
+  password    String
+  role        Role     @default(employee)
+  provider    String   @default("local")
+  verified    Boolean  @default(false)
+  created_at  DateTime @default(now()) @db.Date
+  updated_at  DateTime @default(now()) @db.Date
+
+  employee Employee @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+
+  @@map("accounts")
+}

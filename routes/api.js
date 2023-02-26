@@ -7,6 +7,7 @@ import { avatarUpload } from '../handler/fileUpload.js';
 // Import Controllers for API routes
 import employeeController from '../controllers/employeeController.js';
 import jobController from '../controllers/jobController.js';
+import attendanceController from '../controllers/attendanceController.js';
 
 // Global variables
 const router = express.Router();
@@ -52,5 +53,14 @@ router.post('/job', jobController.store);
 router.get('/job/:id', jobController.show);
 router.put('/job/:id', jobController.update);
 router.delete('/job/:id', jobController.destroy);
+
+// Attendance API routes
+router.get('/attendance', attendanceController.index);
+router.post('/attendance', attendanceController.store);
+router.get('/attendance/:id', attendanceController.show);
+router.get('/attendance/date/:date', attendanceController.showAllForSpecificDate);
+router.get('/attendance/employee/:employee_id', attendanceController.showAllForSpecificEmployee);
+router.put('/attendance/:id', attendanceController.update);
+router.delete('/attendance/:id', attendanceController.destroy);
 
 export default router;

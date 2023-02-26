@@ -5,5 +5,8 @@ import generateController from '../controllers/generateController.js';
 const router = express.Router();
 
 router.get('/employee', generateController.generateEmployees);
+router.get('/job', generateController.generateJobs);
+router.get('/duty', generateController.generateDuties);
+router.get('/attendance', generateController.generateAttendances);
 
 export default router;
