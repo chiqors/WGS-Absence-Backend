@@ -1,84 +1,200 @@
-import db from '../utils/db.js';
+import { PrismaClient } from '@prisma/client'
+import dayjs from 'dayjs'
+const prisma = new PrismaClient()
 
 const getEmployeeById = async (id) => {
-    return await db.query(
-        `SELECT * FROM employees WHERE id = $1`,
-        [id]
-    );
+    const employee = await prisma.employee.findUnique({
+        where: {
+            id: id
+        },
+        include: {
+            account: true,
+            job: true,
+            attendance: {
+                where: {
+                    // list 5 last attendance
+                    time_in: {
+                        gte: dayjs().subtract(5, 'day').toDate(),
+                        lte: dayjs().endOf('day').toDate()
+                    },
+                },
+                orderBy: {
+                    time_in: 'desc'
+                },
+                take: 5
+            }
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return employee
 }
 
 const getEmployeeByName = async (name) => {
-    return await db.query(
-        `SELECT * FROM employees WHERE full_name LIKE $1`,
-        [name]
-    );
+    const employee = await prisma.employee.findFirst({
+        where: {
+            full_name: name
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return employee
 }
 
 const checkAuth = async (username, password) => {
-    return await db.query(
-        `SELECT * FROM employees WHERE username = $1 AND password = $2`,
-        [username, password]
-    );
+    const employee = await prisma.employee.findFirst({
+        where: {
+            username: username,
+            password: password
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return employee
 }
 
 const getAllEmployees = async () => {
-    return await db.query(
-        `SELECT * FROM employees`
-    );
+    const employees = await prisma.employee.findMany({
+        orderBy: {
+            id: 'desc'
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return employees
 }
 
 const getAllEmployeesWithLimitAndOffset = async (limit, offset) => {
-    return await db.query(
-        `SELECT * FROM employees LIMIT $1 OFFSET $2`,
-        [limit, offset]
-    );
+    const employees = await prisma.employee.findMany({
+        orderBy: {
+            id: 'desc'
+        },
+        take: limit,
+        skip: offset
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return employees
 }
 
 const getAllEmployeesWithLimitOffsetAndRelationWithJobs = async (limit, offset) => {
-    return await db.query(
-        `SELECT employees.*, jobs.title AS job_title FROM employees JOIN jobs ON employees.job_id = jobs.id ORDER BY employees.id DESC LIMIT $1 OFFSET $2`,
-        [limit, offset]
-    );
+    const employees = await prisma.employee.findMany({
+        orderBy: {
+            id: 'desc'
+        },
+        take: limit,
+        skip: offset,
+        select: {
+            id: true,
+            full_name: true,
+            gender: true,
+            phone: true,
+            address: true,
+            birthdate: true,
+            joined_at: true,
+            photo_url: true,
+            account: {
+                select: {
+                    email: true,
+                }
+            },
+            job: {
+                select: {
+                    name: true
+                }
+            },
+            // get status from a function to see if he attended today
+            attendance: {
+                select: {
+                    duty: true,
+                },
+                where: {
+                    // time in must be today
+                    time_in: {
+                        gte: dayjs().startOf('day').toDate(),
+                        lte: dayjs().endOf('day').toDate()
+                    },
+                }
+            }
+        }
+    })
+    return employees
 }
 
 const countAllEmployees = async () => {
-    const data = await db.query(
-        `SELECT COUNT(*) as total FROM employees`
-    );
-    const number = parseInt(data.rows[0].total);
-    return number;
+    const count = await prisma.employee.count().finally(async () => {
+        await prisma.$disconnect()
+    })
+    return count
 }
 
 const storeEmployee = async (employee) => {
-    return await db.query(
-        `INSERT INTO employees (full_name, gender, phone, address, birthdate, photo_url, username, password, email, job_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
-        [employee.full_name, employee.gender, employee.phone, employee.address, employee.birthdate, employee.photo_url, employee.username, employee.password, employee.email, employee.job_id]
-    )
+    return await prisma.employee.create({
+        data: {
+            full_name: employee.full_name,
+            gender: employee.gender,
+            phone: employee.phone,
+            address: employee.address,
+            birthdate: employee.birthdate,
+            joined_at: dayjs().toDate(),
+            photo_url: employee.photo_url,
+            job: {
+                connect: {
+                    id: employee.job_id
+                }
+            },
+            account: {
+                create: {
+                    email: employee.email,
+                    username: employee.username,
+                    password: employee.password
+                }
+            }
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
 }
 
 const updateEmployee = async (employee) => {
-    // update query based on available data
-    let query = `UPDATE employees SET `
-    let params = []
-    Array.from(Object.keys(employee)).forEach((key, index) => {
-        if (employee[key] !== undefined) {
-            query += `${key} = $${index + 1}, `
-            params.push(employee[key])
+    return await prisma.employee.update({
+        where: {
+            id: employee.id
+        },
+        data: {
+            full_name: employee.full_name,
+            gender: employee.gender,
+            phone: employee.phone,
+            address: employee.address,
+            birthdate: employee.birthdate,
+            photo_url: employee.photo_url,
+            account: {
+                update: {
+                    email: employee.email || undefined,
+                    username: employee.username,
+                    password: employee.password || undefined
+                }
+            },
+            job: {
+                connect: {
+                    id: employee.job_id
+                }
+            }
         }
+    }).finally(async () => {
+        await prisma.$disconnect()
     })
-    query = query.slice(0, -2) + ` WHERE id = $${params.length + 1} RETURNING id`
-    params.push(employee.id)
-    return await db.query(
-        query,
-        params
-    );
 }
 
 const deleteEmployee = async (id) => {
-    return await db.query(
-        `DELETE FROM employees WHERE id = $1`,
-        [id]
-    );
+    // delete employee with account
+    return await prisma.employee.delete({
+        where: {
+            id: id
+        },
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
 }
 
 export default {

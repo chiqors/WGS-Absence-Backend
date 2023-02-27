@@ -1,43 +1,69 @@
-import db from '../utils/db.js';
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
 
 const getJobById = async (id) => {
-    return await db.query(
-        `SELECT * FROM jobs WHERE id = $1`,
-        [id]
-    );
+    const job = await prisma.job.findUnique({
+        where: {
+            id: id
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return job
 }
 
 const getJobByName = async (name) => {
-    return await db.query(
-        `SELECT * FROM jobs WHERE name = $1`,
-        [name]
-    );
+    const job = await prisma.job.findFirst({
+        where: {
+            name: name
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return job
 }
 
 const getAllJobs = async () => {
-    return await db.query(
-        `SELECT * FROM jobs`
-    );
+    const jobs = await prisma.job.findMany({
+        orderBy: {
+            id: 'desc'
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return jobs
 }
 
 const storeJob = async (job) => {
-    return await db.query(
-        `INSERT INTO jobs (name) VALUES ($1) RETURNING id`,
-        [job.name]
-    )
+    const newJob = await prisma.job.create({
+        data: job
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return newJob
 }
 
 const updateJob = async (job) => {
-    return await db.query(
-        `UPDATE jobs SET name = '${job.name}' WHERE id = ${job.id}`
-    );
+    const updateJob = await prisma.job.update({
+        where: {
+            id: job.id
+        },
+        data: job
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return updateJob
 }
 
 const deleteJob = async (id) => {
-    return await db.query(
-        `DELETE FROM jobs WHERE id = $1`,
-        [id]
-    );
+    const deleteJob = await prisma.job.delete({
+        where: {
+            id: id
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return deleteJob
 }
 
 export default {

@@ -1,33 +1,69 @@
-import db from '../utils/db.js';
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
 
 const getDutyById = async(id) => {
-    const data = await db.query('SELECT * FROM duties WHERE id = $1', [id]);
-    return data;
+    const duty = await prisma.duty.findUnique({
+        where: {
+            id: id
+        }
+    }).finally(async() => {
+        await prisma.$disconnect()
+    })
+    return duty
 }
 
 const getDutyByName = async(name) => {
-    const data = await db.query('SELECT * FROM duties WHERE task_name LIKE $1', [name]);
-    return data;
+    const duty = await prisma.duty.findFirst({
+        where: {
+            task_name: name
+        }
+    }).finally(async() => {
+        await prisma.$disconnect()
+    })
+    return duty
 }
 
 const getAllDuties = async() => {
-    const data = await db.query('SELECT * FROM duties');
-    return data;
+    const duties = await prisma.duty.findMany({
+        orderBy: {
+            id: 'desc'
+        }
+    }).finally(async() => {
+        await prisma.$disconnect()
+    })
+    return duties
 }
 
 const storeDuty = async(duty) => {
-    const data = await db.query('INSERT INTO duties (job_id, task_name, duration_type) VALUES ($1, $2, $3) RETURNING id', [duty.job_id, duty.task_name, duty.duration_type]);
-    return data;
+    const newDuty = await prisma.duty.create({
+        data: duty
+    }).finally(async() => {
+        await prisma.$disconnect()
+    })
+    return newDuty
 }
 
 const updateDuty = async(duty) => {
-    const data = await db.query('UPDATE duties SET job_id = $1, task_name = $2, duration_type = $3 WHERE id = $4', [duty.job_id, duty.task_name, duty.duration_type, duty.id]);
-    return data;
+    const updateDuty = await prisma.duty.update({
+        where: {
+            id: duty.id
+        },
+        data: duty
+    }).finally(async() => {
+        await prisma.$disconnect()
+    })
+    return updateDuty
 }
 
 const deleteDuty = async(id) => {
-    const data = await db.query('DELETE FROM duties WHERE id = $1', [id]);
-    return data;
+    const deleteDuty = await prisma.duty.delete({
+        where: {
+            id: id
+        }
+    }).finally(async() => {
+        await prisma.$disconnect()
+    })
+    return deleteDuty
 }
 
 export default {

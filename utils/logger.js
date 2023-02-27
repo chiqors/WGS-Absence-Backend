@@ -1,13 +1,13 @@
 import rfs from 'rotating-file-stream';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 // Global variables and Initialization
 // get the project directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-moment.locale('id');
+dayjs.locale('id');
 
 const saveErrorLog = (err, url, http_method, status_code) => {
     // saving error messages to a file in the logs directory
@@ -16,7 +16,7 @@ const saveErrorLog = (err, url, http_method, status_code) => {
         path: path.join(__dirname, '../logs')
     })
     // write error message with timestamp
-    accessLogStream.write(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${err} = ${url} - ${http_method} | ${status_code}` + '\n');
+    accessLogStream.write(`[${dayjs().format('YYYY-MM-DD HH:mm:ss')}] ${err} = ${url} - ${http_method} | ${status_code}` + '\n');
 }
 
 const saveMorganLog = () => {
