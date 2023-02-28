@@ -106,16 +106,16 @@ model Employee {
 
 // Authentication with Google OAuth
 model Account {
-  id          String        @id @default(uuid())
-  employee_id Int           @unique
-  email       String        @unique
-  username    String        @unique
+  id          String   @id @default(uuid())
+  employee_id Int      @unique
+  email       String   @unique
+  username    String   @unique
   password    String
-  role        Role          @default(employee)
-  provider    OAuthProvider @default(local)
-  verified    Boolean       @default(false)
-  created_at  DateTime      @default(now()) @db.Date
-  updated_at  DateTime      @default(now()) @db.Date
+  role        Role     @default(employee)
+  token       String?  @unique
+  verified    Boolean  @default(false)
+  created_at  DateTime @default(now()) @db.Date
+  updated_at  DateTime @default(now()) @db.Date
 
   employee Employee @relation(fields: [employee_id], references: [id], onDelete: Cascade)
 
@@ -123,6 +123,9 @@ model Account {
 }
 
 // OAuth (WIP)
+// every employee can have multiple OAuth accounts
+// but, they can only have one account with the same provider
+// meaning, they can only have one google account, one facebook account, etc.
 model OAuthAccount {
   id          String        @id @default(uuid())
   employee_id Int
@@ -130,8 +133,7 @@ model OAuthAccount {
   email       String?
   username    String?
   phone       String?
-  token       String
-  refresh     String?
+  token       String        @unique
   created_at  DateTime      @default(now()) @db.Date
   updated_at  DateTime      @default(now()) @db.Date
 

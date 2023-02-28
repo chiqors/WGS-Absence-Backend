@@ -2,9 +2,9 @@
 import express from 'express';
 import morgan from 'morgan';
 import bodyParser from "body-parser";
-import dotenv from 'dotenv'
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
 
 // Routes
 import apiRouter from './routes/api.js';
@@ -14,9 +14,9 @@ import genRouter from './routes/gen.js';
 import logger from './utils/logger.js';
 
 // Global variables and Initialization
-const app = express();
-const port = process.env.PORT || 3000;
 dotenv.config();
+const app = express();
+const port = process.env.PORT || 3001;
 
 // 1. Middleware for parsing JSON and urlencoded data
 app.use(express.json());

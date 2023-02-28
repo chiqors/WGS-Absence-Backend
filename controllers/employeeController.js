@@ -28,15 +28,15 @@ const googleOauth = async(req, res) => {
                 Authorization: `Bearer ${accessToken}`,
             },
         });
-        data = await Employee.checkGoogleOauth(resp.data.email);
+        data = await Employee.checkGoogleOauth(resp.data);
     }
     if (req.body.credential) {
         const credential = req.body.credential;
         const decoded = jwt_decode(credential);
-        data = await Employee.checkGoogleOauth(decoded.email);
+        data = await Employee.checkGoogleOauth(decoded);
     }
     if (data) {
-        res.status(200).json({ message: 'You are successfully logged in' });
+        res.status(200).json({ message: 'You are successfully logged in', token: data  });
     } else {
         const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
         logger.saveErrorLog('Your Google Account does not registered', fullUrl, 'POST', 404);
