@@ -34,6 +34,13 @@ enum DutyStatus {
   completed
 }
 
+enum OAuthProvider {
+  local
+  google
+  facebook
+  github
+}
+
 // Model Data
 
 model Job {
@@ -89,13 +96,15 @@ model Employee {
   joined_at DateTime @default(now()) @db.Date
   photo_url String
 
-  job        Job          @relation(fields: [job_id], references: [id])
-  attendance Attendance[]
-  account    Account?
+  job          Job            @relation(fields: [job_id], references: [id])
+  attendance   Attendance[]
+  account      Account?
+  OAuthAccount OAuthAccount[]
 
   @@map("employees")
 }
 
+// Authentication with Google OAuth
 model Account {
   id          String   @id @default(uuid())
   employee_id Int      @unique
@@ -103,7 +112,7 @@ model Account {
   username    String   @unique
   password    String
   role        Role     @default(employee)
-  provider    String   @default("local")
+  token       String?  @unique
   verified    Boolean  @default(false)
   created_at  DateTime @default(now()) @db.Date
   updated_at  DateTime @default(now()) @db.Date
@@ -111,4 +120,24 @@ model Account {
   employee Employee @relation(fields: [employee_id], references: [id], onDelete: Cascade)
 
   @@map("accounts")
+}
+
+// OAuth (WIP)
+// every employee can have multiple OAuth accounts
+// but, they can only have one account with the same provider
+// meaning, they can only have one google account, one facebook account, etc.
+model OAuthAccount {
+  id          String        @id @default(uuid())
+  employee_id Int
+  provider    OAuthProvider
+  email       String?
+  username    String?
+  phone       String?
+  token       String        @unique
+  created_at  DateTime      @default(now()) @db.Date
+  updated_at  DateTime      @default(now()) @db.Date
+
+  employee Employee @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+
+  @@map("oauth_accounts")
 }

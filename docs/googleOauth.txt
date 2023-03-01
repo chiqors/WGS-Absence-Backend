@@ -1,0 +1,64 @@
+Oauth google have 3 way to implement
+
+1. Sign in flows (One Tap, Personalized Button)
+2. Authorization Flows (Extra scoping)
+
+2.1. Implicit Flows
+2.2. Authentication Code
+
+response from oauth google using sign-in flows
+{
+  credential: 
+    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImQyNWY4ZGJjZjk3ZGM3ZWM0MDFmMDE3MWZiNmU2YmRhOWVkOWU3OTIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJuYmYiOjE2Nzc0MTU5MTcsImF1ZCI6IjMxOTQ0NjAzODE2My1ham1rODUyaDZkNDVuYzdvajFkN2V0bmRrMzdrdTk0MC5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjEwMTEyMjEzMjY5ODA5OTQ2OTY1MCIsImVtYWlsIjoiZmF0aG9uaTEwNUBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXpwIjoiMzE5NDQ2MDM4MTYzLWFqbWs4NTJoNmQ0NW5jN29qMWQ3ZXRuZGszN2t1OTQwLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwibmFtZSI6IkNoaXFvIFJpZmt5IFNhcHV0cmEiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUdObXl4WnR0S3NKTG9sM1JrdVhPUjNpSFVUZGRVRGtSMEw5bF82Q0JKZUJ3UT1zOTYtYyIsImdpdmVuX25hbWUiOiJDaGlxbyIsImZhbWlseV9uYW1lIjoiUmlma3kgU2FwdXRyYSIsImlhdCI6MTY3NzQxNjIxNywiZXhwIjoxNjc3NDE5ODE3LCJqdGkiOiI1MjdjOWUyYjUwMTkzZDVhMjUxZDE3YTI4YTZjM2FjNDQ2YWVjZWQ1In0.CmDStlvnwmbfFt1dN9o_9fXYmKB2ZycP5x0VS6eMXaUwhsYg2RJHF7kLcggQiyqqo04hyFMNFbMuDO2SMnGs6d_atrSSDQenCjij09j8r7c6ojkWL0v71euyscE9kL8uEQnkPddB5jr9t9POWzLy_AbRvlphCzvw19vK9w7dOacKPocamopRfGEkH2lNv6yjhiBXew2XvG89u-BowAelMLvV_40OcXrpF3n_k1XPFi6baRVy4g7G0PHoLsvZCGKYbt3tIq6kz27t1vCTlkraWqQK7jPXXDazbs-v0j7_gdi5ieA4YReS6s3XlnC5dPAxfdKoShHqPNkGXSheTFj4KQ',
+  clientId: '319446038163-ajmk852h6d45nc7oj1d7etndk37ku940.apps.googleusercontent.com',
+  select_by: 'user'
+}
+decoded credentials from JWT
+{
+    alg: "RS256",
+    kid: "d25f8dbcf97dc7ec401f0171fb6e6bda9ed9e792",
+    typ: "JWT"
+},
+{
+    iss: "https://accounts.google.com",
+    nbf: 1677412553,
+    aud: "319446038163-ajmk852h6d45nc7oj1d7etndk37ku940.apps.googleusercontent.com",
+    sub: "101122132698099469650",
+    email: "fathoni105@gmail.com",
+    email_verified: true,
+    azp: "319446038163-ajmk852h6d45nc7oj1d7etndk37ku940.apps.googleusercontent.com",
+    name: "Chiqo Rifky Saputra",
+    picture: "https://lh3.googleusercontent.com/a/AGNmyxZttKsJLol3RkuXOR3iHUTddUDkR0L9l_6CBJeBwQ=s96-c",
+    given_name: "Chiqo",
+    family_name: "Rifky Saputra",
+    iat: 1677412853,
+    exp: 1677416453,
+    jti: "f9dd722e14f8338c16e72bada897761714709c8e"
+},
+[signature]
+
+
+response from oauth google using implicit flows
+{
+  "access_token": "ya29.a0AVvZVspEkJ_D_5UVqJuPep7LiaJ5WvK0ChcVUAZdom0f3Lo0uc-be8x-Yfpg_bCxFQ2gNXRS5vQPuXFgW5Ecrnmc5RixdhV0hZnToH6wXCnWonkCdGaw75mRa8kATMqwq_MzMZycvfI6WO2prhdodeo5V0JjaCgYKARASARISFQGbdwaIS-s3O0x3XeAmcnbPpjpMtg0163",
+  "token_type": "Bearer",
+  "expires_in": 3599,
+  "scope": "email profile openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
+  "authuser": "0",
+  "prompt": "consent"
+}
+response from scope api for retrieving email and profile
+{
+  sub: '101122132698099469650',
+  name: 'Chiqo Rifky Saputra',
+  given_name: 'Chiqo',
+  family_name: 'Rifky Saputra',
+  picture: 'https://lh3.googleusercontent.com/a/AGNmyxZttKsJLol3RkuXOR3iHUTddUDkR0L9l_6CBJeBwQ=s96-c',
+  email: 'fathoni105@gmail.com',
+  email_verified: true,
+  locale: 'en'
+}
+
+Documentations:
+https://react-oauth.vercel.app
+https://developers.google.com/identity/gsi/web/reference/js-reference

@@ -1,4 +1,6 @@
 import express from 'express';
+import express_jwt from "express-jwt";
+import jwt from 'jsonwebtoken';
 
 // Import Handler for API routes
 import { validateCreateEmployee, validateEditEmployee } from '../handler/formValidation.js';
@@ -11,6 +13,7 @@ import attendanceController from '../controllers/attendanceController.js';
 
 // Global variables
 const router = express.Router();
+const { expressjwt, ExpressJwtRequest } = express_jwt;
 
 // Testing API routes
 router.get('/', (req, res) => {
@@ -37,7 +40,41 @@ router.post('/upload', avatarUpload.single('uploaded_file'), function (req, res)
     console.log(req.file, req.body)
 });
 
+// test jwt
+router.get('/jwt', expressjwt({ secret: process.env.JWT_SECRET, algorithms: ['HS256'] }), (req, res) => {
+    console.log('GET /api/jwt with token');
+    res.send('GET /api/jwt with token');
+});
+router.get('/jwt/get', (req, res) => {
+    const payload = {
+        id: 1,
+        username: 'admin',
+    };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    // localStorage.setItem('token', token);
+    res.send(token);
+});
+router.get('/jwt/decode', (req, res) => {
+    const token = req.headers.authorization.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    res.send(decoded);
+});
+router.get('/jwt/delete', (req, res) => {
+    // localStorage.removeItem('token');
+    res.send('token deleted');
+});
+
+
+router.use((err, req, res, next) => {
+    if (err.name === 'UnauthorizedError') {
+        res.status(401).send('invalid token...');
+    } else {
+        next();
+    }
+});
+
 // Auth
+router.post('/google-oauth', employeeController.googleOauth);
 router.post('/login', employeeController.login);
 
 // Employee API routes

@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import dayjs from 'dayjs'
+import jwt from 'jsonwebtoken'
 const prisma = new PrismaClient()
 
 const getEmployeeById = async (id) => {
@@ -42,15 +43,98 @@ const getEmployeeByName = async (name) => {
 }
 
 const checkAuth = async (username, password) => {
-    const employee = await prisma.employee.findFirst({
+    const account = await prisma.account.findFirst({
         where: {
             username: username,
             password: password
+        },
+        select: {
+            id: true,
+            employee: {
+                select: {
+                    id: true,
+                    account: {
+                        select: {
+                            role: true
+                        }
+                    }
+                }
+            }
         }
     }).finally(async () => {
         await prisma.$disconnect()
     })
-    return employee
+    const payload = {
+        id: account.id,
+        employee_id: account.employee.id,
+        role: account.role
+    };
+    const tokenJwt = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return tokenJwt;
+}
+
+const checkGoogleOauth = async (data) => {
+    const oauthAccount = await prisma.oAuthAccount.findFirst({
+        where: {
+            email: data.email,
+            provider: 'google'
+        },
+        select: {
+            id: true,
+            employee: {
+                select: {
+                    id: true,
+                    account: {
+                        select: {
+                            role: true
+                        }
+                    }
+                }
+            }
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    // check if oauth account is valid
+    if (oauthAccount) {
+        // generate new token
+        const payload = {
+            id: oauthAccount.id,
+            employee_id: oauthAccount.employee.id,
+            role: oauthAccount.employee.account.role
+        };
+        const tokenJwt = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+        await prisma.oAuthAccount.update({
+            where: {
+                id: oauthAccount.id
+            },
+            data: {
+                token: tokenJwt
+            }
+        }).finally(async () => {
+            await prisma.$disconnect()
+        })
+        return tokenJwt
+    }
+}
+
+const checkAuthJwt = async (token) => {
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const account = await prisma.account.findUnique({
+            where: {
+                id: decoded.id
+            },
+            include: {
+                employee: true
+            }
+        }).finally(async () => {
+            await prisma.$disconnect()
+        })
+        return account
+    } catch (err) {
+        return 'token expired / invalid'
+    }
 }
 
 const getAllEmployees = async () => {
@@ -201,6 +285,8 @@ export default {
     getEmployeeById,
     getEmployeeByName,
     checkAuth,
+    checkGoogleOauth,
+    checkAuthJwt,
     getAllEmployees,
     getAllEmployeesWithLimitAndOffset,
     getAllEmployeesWithLimitOffsetAndRelationWithJobs,
