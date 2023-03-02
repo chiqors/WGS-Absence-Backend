@@ -10,7 +10,6 @@ const getEmployeeById = async (id) => {
         },
         include: {
             account: true,
-            job: true,
             attendance: {
                 where: {
                     // list 5 last attendance
@@ -23,6 +22,15 @@ const getEmployeeById = async (id) => {
                     time_in: 'desc'
                 },
                 take: 5
+            },
+            contract: {
+                where: {
+                    // show only active contract
+                    status: true
+                },
+                include: {
+                    job: true
+                }
             }
         }
     }).finally(async () => {
@@ -176,19 +184,6 @@ const getAllEmployees = async () => {
     return employees
 }
 
-const getAllEmployeesWithLimitAndOffset = async (limit, offset) => {
-    const employees = await prisma.employee.findMany({
-        orderBy: {
-            id: 'desc'
-        },
-        take: limit,
-        skip: offset
-    }).finally(async () => {
-        await prisma.$disconnect()
-    })
-    return employees
-}
-
 const getAllEmployeesWithLimitOffsetAndRelationWithJobs = async (limit, offset) => {
     const employees = await prisma.employee.findMany({
         orderBy: {
@@ -210,10 +205,21 @@ const getAllEmployeesWithLimitOffsetAndRelationWithJobs = async (limit, offset) 
                     email: true,
                 }
             },
-            job: {
+            contract: {
                 select: {
-                    name: true
-                }
+                    job: {
+                        select: {
+                            id: true,
+                            name: true,
+                        }
+                    },
+                    start_date: true,
+                    end_date: true,
+                },
+                where: {
+                    // contract must be active
+                    status: true
+                },
             },
             // get status from a function to see if he attended today
             attendance: {
@@ -250,9 +256,16 @@ const storeEmployee = async (employee) => {
             birthdate: employee.birthdate,
             joined_at: dayjs().toDate(),
             photo_url: employee.photo_url,
-            job: {
-                connect: {
-                    id: employee.job_id
+            contract: {
+                create: {
+                    start_date: employee.contract.start_date,
+                    end_date: employee.contract.end_date,
+                    status: employee.contract.status,
+                    job: {
+                        connect: {
+                            id: employee.contract.job_id
+                        }
+                    }
                 }
             },
             account: {
@@ -261,7 +274,7 @@ const storeEmployee = async (employee) => {
                     username: employee.username,
                     password: employee.password
                 }
-            }
+            },
         },
         select: {
             account: {
@@ -306,6 +319,7 @@ const updateEmployee = async (employee) => {
             address: employee.address,
             birthdate: employee.birthdate,
             photo_url: employee.photo_url,
+            joined_at: employee.joined_at || undefined,
             account: {
                 update: {
                     email: employee.email || undefined,
@@ -313,9 +327,16 @@ const updateEmployee = async (employee) => {
                     password: employee.password || undefined
                 }
             },
-            job: {
-                connect: {
-                    id: employee.job_id
+            contract: {
+                update: {
+                    start_date: employee.contract.start_date || undefined,
+                    end_date: employee.contract.end_date || undefined,
+                    status: employee.contract.status || undefined,
+                    job: {
+                        connect: {
+                            id: employee.contract.job_id || undefined
+                        }
+                    }
                 }
             }
         }
@@ -324,15 +345,27 @@ const updateEmployee = async (employee) => {
     })
 }
 
-const deleteEmployee = async (id) => {
-    // delete employee with account and oauth
-    return await prisma.employee.delete({
+const resignEmployee = async (id) => {
+    return await prisma.employee.update({
         where: {
             id: id
         },
-        include: {
-            account: true,
-            oauth: true
+        data: {
+            account: {
+                update: {
+                    token: null,
+                    verified: false,
+                    status: false
+                }
+            },
+            contract: {
+                update: {
+                    status: false
+                },
+                where: {
+                    status: true
+                }
+            }
         }
     }).finally(async () => {
         await prisma.$disconnect()
@@ -347,10 +380,9 @@ export default {
     checkAuthJwt,
     verifyEmail,
     getAllEmployees,
-    getAllEmployeesWithLimitAndOffset,
     getAllEmployeesWithLimitOffsetAndRelationWithJobs,
     countAllEmployees,
     storeEmployee,
     updateEmployee,
-    deleteEmployee,
+    resignEmployee
 };

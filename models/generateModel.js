@@ -4,7 +4,6 @@ import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
 import helper from '../handler/helper.js';
 import { PrismaClient } from '@prisma/client'
-import { verify } from 'jsonwebtoken';
 const prisma = new PrismaClient()
 faker.locale = 'id_ID'; 
 dayjs.locale('id');
@@ -29,12 +28,6 @@ export const generateInsertEmployeeQuery = async(num) => {
         )).toISOString()
         await prisma.employee.create({
             data: {
-                job: {
-                    connect: {
-                        id: jobIds[Math.floor(Math.random() * jobIds.length)].id
-                    }
-                },
-                job_id: jobIds[helper.randomIntFromInterval(0, jobIds.length - 1)].id,
                 full_name: faker.name.fullName(),
                 gender: faker.name.sex(),
                 phone: faker.phone.number('08##########'),
@@ -48,6 +41,20 @@ export const generateInsertEmployeeQuery = async(num) => {
                         username: faker.internet.userName(),
                         password: faker.internet.password(),
                         role: 'employee'
+                    }
+                },
+                contract: {
+                    create: {
+                        start_date: joined_at,
+                        end_date: dayjs(faker.date.between(
+                            joined_at, '2023-02-25T00:00:00.000Z'
+                        )).toISOString(),
+                        status: true,
+                        job: {
+                            connect: {
+                                id: jobIds[helper.randomIntFromInterval(0, jobIds.length - 1)].id
+                            }
+                        }
                     }
                 }
             }
