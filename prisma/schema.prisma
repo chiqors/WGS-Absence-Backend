@@ -12,6 +12,11 @@ datasource db {
 
 // Enum Data
 
+enum Status {
+  active
+  inactive
+}
+
 enum Gender {
   male
   female
@@ -95,6 +100,7 @@ model Employee {
   birthdate DateTime @db.Date
   joined_at DateTime @default(now()) @db.Date
   photo_url String
+  status    Status   @default(active)
 
   job          Job            @relation(fields: [job_id], references: [id])
   attendance   Attendance[]
@@ -114,6 +120,7 @@ model Account {
   role        Role     @default(employee)
   token       String?  @unique
   verified    Boolean  @default(false)
+  status      Boolean  @default(true)
   created_at  DateTime @default(now()) @db.Date
   updated_at  DateTime @default(now()) @db.Date
 
@@ -134,6 +141,7 @@ model OAuthAccount {
   username    String?
   phone       String?
   token       String        @unique
+  status      Boolean       @default(true)
   created_at  DateTime      @default(now()) @db.Date
   updated_at  DateTime      @default(now()) @db.Date
 

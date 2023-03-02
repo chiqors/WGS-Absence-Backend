@@ -324,15 +324,18 @@ const updateEmployee = async (employee) => {
     })
 }
 
-const deleteEmployee = async (id) => {
-    // delete employee with account and oauth
-    return await prisma.employee.delete({
+const deactivateEmployee = async (id) => {
+    return await prisma.employee.update({
         where: {
             id: id
         },
-        include: {
-            account: true,
-            oauth: true
+        data: {
+            status: 'inactive',
+            account: {
+                update: {
+                    status: false
+                }
+            }
         }
     }).finally(async () => {
         await prisma.$disconnect()
@@ -352,5 +355,5 @@ export default {
     countAllEmployees,
     storeEmployee,
     updateEmployee,
-    deleteEmployee,
+    deactivateEmployee
 };
