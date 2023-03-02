@@ -5,8 +5,10 @@ import jwt from 'jsonwebtoken';
 // Import Handler for API routes
 import { validateCreateEmployee, validateEditEmployee } from '../handler/formValidation.js';
 import { avatarUpload } from '../handler/fileUpload.js';
+import sendMail from '../handler/mail.js';
 
 // Import Controllers for API routes
+import authController from '../controllers/authController.js';
 import employeeController from '../controllers/employeeController.js';
 import jobController from '../controllers/jobController.js';
 import attendanceController from '../controllers/attendanceController.js';
@@ -38,6 +40,23 @@ router.post('/upload', avatarUpload.single('uploaded_file'), function (req, res)
     // req.file is the name of your file in the form above, here 'uploaded_file'
     // req.body will hold the text fields, if there were any 
     console.log(req.file, req.body)
+});
+
+// test mail
+router.post('/testMail', (req, res) => {
+    let mailOptions = {
+        to: req.body.to,
+        subject: req.body.subject,
+        body: req.body.body
+    };
+    console.log(mailOptions);
+    
+    sendMail(mailOptions.to, mailOptions.subject, mailOptions.content).then((response) => {
+        res.status(250).send(response);
+    }).catch((error) => {
+        console.log(error);
+        res.status(500).send(error);
+    });
 });
 
 // test jwt
@@ -73,15 +92,11 @@ router.use((err, req, res, next) => {
     }
 });
 
-// Auth
-router.post('/google-oauth', employeeController.googleOauth);
-router.post('/login', employeeController.login);
-
 // Employee API routes
 router.get('/employee', employeeController.index);
-router.post('/employee', avatarUpload.single('photo_url'), validateCreateEmployee, employeeController.store);
+router.post('/employee', avatarUpload.single('photo_file'), validateCreateEmployee, employeeController.store);
 router.get('/employee/:id', employeeController.show);
-router.put('/employee/:id', avatarUpload.single('photo_url'), validateEditEmployee, employeeController.update);
+router.put('/employee/:id', avatarUpload.single('photo_file'), validateEditEmployee, employeeController.update);
 router.delete('/employee/:id', employeeController.destroy);
 
 // Job API routes

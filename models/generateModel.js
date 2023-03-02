@@ -4,6 +4,7 @@ import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
 import helper from '../handler/helper.js';
 import { PrismaClient } from '@prisma/client'
+import { verify } from 'jsonwebtoken';
 const prisma = new PrismaClient()
 faker.locale = 'id_ID'; 
 dayjs.locale('id');
@@ -28,6 +29,11 @@ export const generateInsertEmployeeQuery = async(num) => {
         )).toISOString()
         await prisma.employee.create({
             data: {
+                job: {
+                    connect: {
+                        id: jobIds[Math.floor(Math.random() * jobIds.length)].id
+                    }
+                },
                 job_id: jobIds[helper.randomIntFromInterval(0, jobIds.length - 1)].id,
                 full_name: faker.name.fullName(),
                 gender: faker.name.sex(),
@@ -44,7 +50,6 @@ export const generateInsertEmployeeQuery = async(num) => {
                         role: 'employee'
                     }
                 }
-                
             }
         }).finally(async () => {
             await prisma.$disconnect()
@@ -52,7 +57,7 @@ export const generateInsertEmployeeQuery = async(num) => {
     });
 }
 
-export const generateInsertJobQuery = () => {
+export const generateInsertJobQuery = async() => {
     // generate fake data
     const jobs = [
         {
@@ -98,7 +103,11 @@ export const generateInsertJobQuery = () => {
         {
             name: 'IT Security',
             description: 'Mengamankan sistem'
-        }
+        },
+        {
+            name: 'HRD Manager',
+            description: 'Mengatur sumber daya manusia'
+        },
     ]
     jobs.forEach(async(job) => {
         await prisma.job.create({
@@ -221,14 +230,12 @@ export const generateInsertAttendanceQuery = async(num) => {
                 }
             }
         })) {
-            console.log('attendance already exist for that employee on that date')
             return
         }
         // create attendance based on employee job
         const job_id_emp = employeeIds.find(emp => emp.id === empId_selected).job_id
         const duty_id = dutyIds.find(duty => duty.job_id === job_id_emp)
         if (!duty_id) {
-            console.log('no duty found')
             return
         }
         await prisma.attendance.create({
@@ -261,4 +268,62 @@ export const generateInsertAttendanceQuery = async(num) => {
             await prisma.$disconnect()
         })
     });
+}
+
+export const generateInsertAdminQuery = async() => {
+    let jobId = null;
+    const findAndGetHrdJob = await prisma.job.findFirst({
+        where: {
+            name: 'HRD Manager'
+        },
+        select: {
+            id: true
+        }
+    })
+    if (findAndGetHrdJob) {
+        jobId = findAndGetHrdJob.id
+    }
+    const admin = {
+        job_id: jobId,
+        full_name: 'Risa Yunita',
+        gender: 'female',
+        phone: '081234567890',
+        address: 'Jl. Raya Cibubur No. 1',
+        birthdate: dayjs('1999-01-01').toISOString(),
+        joined_at: dayjs('2020-01-01').toISOString(),
+        photo_url: 'https://cdn.discordapp.com/attachments/1023968763432943650/1080692752439844874/hr_1.png',
+        account: {
+            email: 'fathoniplay@gmail.com',
+            username: 'risayunita',
+            password: 'risayunita',
+            role: 'admin',
+            verify: true,
+        }
+    }
+    await prisma.employee.create({
+        data: {
+            job: {
+                connect: {
+                    id: admin.job_id
+                }
+            },
+            full_name: admin.full_name,
+            gender: admin.gender,
+            phone: admin.phone,
+            address: admin.address,
+            birthdate: admin.birthdate,
+            joined_at: admin.joined_at,
+            photo_url: admin.photo_url,
+            account: {
+                create: {
+                    email: admin.account.email,
+                    username: admin.account.username,
+                    password: admin.account.password,
+                    role: admin.account.role
+                }
+            }
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
 }

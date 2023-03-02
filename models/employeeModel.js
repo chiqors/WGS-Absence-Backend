@@ -52,14 +52,10 @@ const checkAuth = async (username, password) => {
             id: true,
             employee: {
                 select: {
-                    id: true,
-                    account: {
-                        select: {
-                            role: true
-                        }
-                    }
+                    id: true
                 }
-            }
+            },
+            role: true
         }
     }).finally(async () => {
         await prisma.$disconnect()
@@ -132,6 +128,38 @@ const checkAuthJwt = async (token) => {
             await prisma.$disconnect()
         })
         return account
+    } catch (err) {
+        return 'token expired / invalid'
+    }
+}
+
+const verifyEmail = async (token) => {
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const account = await prisma.account.findUnique({
+            where: {
+                id: decoded.id
+            },
+            include: {
+                employee: true
+            }
+        }).finally(async () => {
+            await prisma.$disconnect()
+        })
+        if (account) {
+            await prisma.account.update({
+                where: {
+                    id: account.id
+                },
+                data: {
+                    token: null,
+                    verified: true
+                }
+            }).finally(async () => {
+                await prisma.$disconnect()
+            })
+            return 'email verified'
+        }
     } catch (err) {
         return 'token expired / invalid'
     }
@@ -213,7 +241,7 @@ const countAllEmployees = async () => {
 }
 
 const storeEmployee = async (employee) => {
-    return await prisma.employee.create({
+    const createdRecord = await prisma.employee.create({
         data: {
             full_name: employee.full_name,
             gender: employee.gender,
@@ -234,10 +262,36 @@ const storeEmployee = async (employee) => {
                     password: employee.password
                 }
             }
+        },
+        select: {
+            account: {
+                select: {
+                    id: true,
+                    role: true
+                }
+            },
+            id: true,
+        }   
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    const payload = {
+        id: createdRecord.account.id,
+        employee_id: createdRecord.id,
+        role: createdRecord.account.role
+    };
+    const tokenJwt = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    await prisma.account.update({
+        where: {
+            id: createdRecord.account.id
+        },
+        data: {
+            token: tokenJwt
         }
     }).finally(async () => {
         await prisma.$disconnect()
     })
+    return tokenJwt;
 }
 
 const updateEmployee = async (employee) => {
@@ -271,11 +325,15 @@ const updateEmployee = async (employee) => {
 }
 
 const deleteEmployee = async (id) => {
-    // delete employee with account
+    // delete employee with account and oauth
     return await prisma.employee.delete({
         where: {
             id: id
         },
+        include: {
+            account: true,
+            oauth: true
+        }
     }).finally(async () => {
         await prisma.$disconnect()
     })
@@ -287,6 +345,7 @@ export default {
     checkAuth,
     checkGoogleOauth,
     checkAuthJwt,
+    verifyEmail,
     getAllEmployees,
     getAllEmployeesWithLimitAndOffset,
     getAllEmployeesWithLimitOffsetAndRelationWithJobs,
