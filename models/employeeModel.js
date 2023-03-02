@@ -336,7 +336,7 @@ const deleteEmployee = async (id) => {
         }
     }).finally(async () => {
         await prisma.$disconnect()
-    }
+    })
 }
 
 export default {
