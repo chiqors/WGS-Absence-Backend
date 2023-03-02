@@ -34,6 +34,7 @@ export const generateInsertEmployeeQuery = async(num) => {
                         id: jobIds[Math.floor(Math.random() * jobIds.length)].id
                     }
                 },
+                job_id: jobIds[helper.randomIntFromInterval(0, jobIds.length - 1)].id,
                 full_name: faker.name.fullName(),
                 gender: faker.name.sex(),
                 phone: faker.phone.number('08##########'),
