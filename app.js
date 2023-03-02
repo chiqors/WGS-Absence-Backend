@@ -9,6 +9,7 @@ import dotenv from 'dotenv';
 // Routes
 import apiRouter from './routes/api.js';
 import genRouter from './routes/gen.js';
+import authRouter from './routes/auth.js';
 
 // Utils
 import logger from './utils/logger.js';
@@ -41,6 +42,7 @@ app.use(express.static('public'));
 // Routing
 app.use('/api', apiRouter);
 app.use('/gen', genRouter);
+app.use('/auth', authRouter);
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

@@ -10,3 +10,14 @@ This is what Multer API does with multipart/form-data
   path: 'uploads\\c48a72a64c24cd8283800a3f52fb6e78',
   size: 70535
 }
+
+formData.photo_file:
+
+{
+  name: 'hr (1).png',
+  lastModified: 1677727458624,
+  lastModifiedDate: Date new Date('2023-03-02T03:24:18.000Z'),
+  webkitRelativePath: '',
+  size: 31206,
+  type: 'image/png'
+}

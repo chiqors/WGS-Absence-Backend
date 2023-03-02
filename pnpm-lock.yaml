@@ -16,6 +16,7 @@ specifiers:
   jwt-decode: ^3.1.2
   morgan: ^1.10.0
   multer: ^1.4.5-lts.1
+  nodemailer: ^6.9.1
   pg: ^8.9.0
   prisma: ^4.10.1
   rotating-file-stream: ^3.1.0
@@ -35,6 +36,7 @@ dependencies:
   jwt-decode: 3.1.2
   morgan: 1.10.0
   multer: 1.4.5-lts.1
+  nodemailer: 6.9.1
   pg: 8.9.0
   prisma: 4.10.1
   rotating-file-stream: 3.1.0
@@ -572,6 +574,11 @@ packages:
   /negotiator/0.6.3:
     resolution: {integrity: sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==}
     engines: {node: '>= 0.6'}
+    dev: false
+
+  /nodemailer/6.9.1:
+    resolution: {integrity: sha512-qHw7dOiU5UKNnQpXktdgQ1d3OFgRAekuvbJLcdG5dnEo/GtcTHRYM7+UfJARdOFU9WUQO8OiIamgWPmiSFHYAA==}
+    engines: {node: '>=6.0.0'}
     dev: false
 
   /object-assign/4.1.1:
