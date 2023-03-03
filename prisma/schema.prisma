@@ -12,6 +12,11 @@ datasource db {
 
 // Enum Data
 
+enum Verified {
+  verified
+  not_verified
+}
+
 enum Status {
   active
   inactive
@@ -105,24 +110,24 @@ model Employee {
   job          Job            @relation(fields: [job_id], references: [id])
   attendance   Attendance[]
   account      Account?
-  OAuthAccount OAuthAccount[]
+  oauthaccount OAuthAccount[]
 
   @@map("employees")
 }
 
-// Authentication with Google OAuth
 model Account {
-  id          String   @id @default(uuid())
-  employee_id Int      @unique
-  email       String   @unique
-  username    String   @unique
-  password    String
-  role        Role     @default(employee)
-  token       String?  @unique
-  verified    Boolean  @default(false)
-  status      Boolean  @default(true)
-  created_at  DateTime @default(now()) @db.Date
-  updated_at  DateTime @default(now()) @db.Date
+  id                 String   @id @default(uuid())
+  employee_id        Int      @unique
+  email              String   @unique
+  username           String   @unique
+  password           String
+  role               Role     @default(employee)
+  token              String?  @unique
+  verification_token String?  @unique
+  verified           Verified @default(not_verified)
+  status             Status   @default(active)
+  created_at         DateTime @default(now()) @db.Date
+  updated_at         DateTime @default(now()) @db.Date
 
   employee Employee @relation(fields: [employee_id], references: [id], onDelete: Cascade)
 
@@ -133,6 +138,8 @@ model Account {
 // every employee can have multiple OAuth accounts
 // but, they can only have one account with the same provider
 // meaning, they can only have one google account, one facebook account, etc.
+// You can also have a local account, which is the default account
+// Btw, the oauth data can be deleted, but the account will still be there
 model OAuthAccount {
   id          String        @id @default(uuid())
   employee_id Int
@@ -141,7 +148,7 @@ model OAuthAccount {
   username    String?
   phone       String?
   token       String        @unique
-  status      Boolean       @default(true)
+  status      Status        @default(active)
   created_at  DateTime      @default(now()) @db.Date
   updated_at  DateTime      @default(now()) @db.Date
 

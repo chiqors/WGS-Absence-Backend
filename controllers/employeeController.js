@@ -3,6 +3,7 @@ import Employee from '../models/employeeModel.js';
 import logger from '../utils/logger.js';
 import fs from 'fs';
 import mailWelcome from '../templates/mailWelcome.js';
+import mailUpdateEmail from '../templates/mailUpdateEmail.js';
 import sendEmail from '../handler/mail.js';
 
 const index = async(req, res) => {
@@ -47,7 +48,8 @@ const store = async(req, res) => {
     });
     const mailData = {
         to: req.body.email,
-        subject: 'Welcome to Employee Management System',
+        subject: `Email Verification`,
+        description: 'Welcome! This email is for your email verification.',
         body: mailWelcome(req.body.full_name, req.body.username, req.body.password, token)
     }
     await sendEmail(mailData);
@@ -85,6 +87,24 @@ const update = async(req, res) => {
         }
         const fullPublicUrl = `${process.env.UPLOAD_FOLDER || '/uploads'}/${req.body.username}/${req.file.filename}`
         req.body.photo_url = fullPublicUrl
+    }
+    if (req.body.email) {
+        if (req.body.email !== old_data.account.email) {
+            // send email verification for new email
+            const token = await Employee.updateEmail(req.body.email, paramsId).catch((err) => {
+                console.log(err);
+                const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+                logger.saveErrorLog(err, fullUrl, 'PUT', 500);
+                return res.status(500).json({ message: 'Internal Server Error' });
+            });
+            const mailData = {
+                to: req.body.email,
+                subject: `Request Email Change Verification`,
+                description: 'Hi! This email is for your new email verification.',
+                body: mailUpdateEmail(req.body.full_name, token)
+            }
+            await sendEmail(mailData);
+        }
     }
     req.body.id = paramsId;
     req.body.birthdate = new Date(req.body.birthdate);

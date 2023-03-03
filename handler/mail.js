@@ -12,14 +12,19 @@ const sendEmail = async (data) => {
       auth: {
         user: process.env.MAIL_USER, // generated ethereal user
         pass: process.env.MAIL_PASS // generated ethereal password
-      }
+      },
+      from: process.env.MAIL_USER
     });
+
+    const app_name = process.env.APP_NAME;
+    const app_name_uppercase = app_name.toUpperCase().replace(/ /g, '-');
 
     // send email
     const mailOptions = {
-      from: process.env.MAIL_USER,
+      from: `${app_name} <${process.env.MAIL_USER}>`,
       to: data.to,
-      subject: data.subject,
+      subject: `[${app_name_uppercase}] ${data.subject}`,
+      text: data.description,
       html: data.body
     };
 
