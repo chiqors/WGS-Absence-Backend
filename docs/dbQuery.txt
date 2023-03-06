@@ -1,0 +1,6 @@
+DELETE FROM accounts;
+DELETE FROM oauth_accounts;
+DELETE FROM attendances;
+DELETE FROM employees;
+DELETE FROM duties;
+DELETE FROM jobs;

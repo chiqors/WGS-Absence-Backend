@@ -1,5 +1,6 @@
 import Employee from '../models/employeeModel.js';
 import axios from 'axios';
+import logger from '../utils/logger.js';
 import jwt_decode from 'jwt-decode';
 
 const login = async(req, res) => {
@@ -41,10 +42,10 @@ const googleOauth = async(req, res) => {
 }
 
 const verifyEmail = async (req, res) => {
-    const token = req.params.token;
-    await Employee.verifyEmail(token).then(() => {
-        console.log('Email verified');
-        res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/login`);
+    const token = req.query.code;
+    await Employee.verifyEmail(token).then((data) => {
+        console.log(data);
+        res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?verified=true`);
     }).catch((err) => {
         console.log(err);
         const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
@@ -53,8 +54,32 @@ const verifyEmail = async (req, res) => {
     });
 }
 
+const forgotPassword = async (req, res) => {
+    const data = await Employee.forgotPassword(req.body.email);
+    if (data) {
+        res.status(200).json({ message: 'Please check your email to reset your password' });
+    } else {
+        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+        logger.saveErrorLog('Email is not registered', fullUrl, 'POST', 404);
+        res.status(404).json({ message: 'Email is not registered' });
+    }
+}
+
+const resetPassword = async (req, res) => {
+    const data = await Employee.resetPassword(req.body.token, req.body.password);
+    if (data) {
+        res.status(200).json({ message: 'Your password has been changed' });
+    } else {
+        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+        logger.saveErrorLog('Token is invalid', fullUrl, 'POST', 404);
+        res.status(404).json({ message: 'Token is invalid' });
+    }
+}
+
 export default {
     login,
     googleOauth,
-    verifyEmail
+    verifyEmail,
+    forgotPassword,
+    resetPassword,
 }

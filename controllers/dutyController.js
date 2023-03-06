@@ -9,31 +9,17 @@ const index = async(req, res) => {
     }
 }
 
-const store = async(req, res) => {
-    await Duty.storeDuty(req.body);
-}
-
-const show = async(req, res) => {
-    const data = await Duty.getDutyById(req.params.id);
-    if (data.rows.length > 0) {
-        res.json(data.rows);
+const getAllDutyNotAssignedWithJobId = async(req, res) => {
+    const jobId = parseInt(req.params.job_id);
+    const data = await Duty.getAllDutyNotAssignedWithJobId(jobId);
+    if (data) {
+        res.json(data);
     } else {
         res.status(404).json({ message: 'Data not found' });
     }
 }
 
-const update = async(req, res) => {
-    await Duty.updateDuty(req.body);
-}
-
-const destroy = async(req, res) => {
-    await Duty.deleteDuty(req.params.id);
-}
-
 export default {
     index,
-    store,
-    show,
-    update,
-    destroy
-};
+    getAllDutyNotAssignedWithJobId,
+}

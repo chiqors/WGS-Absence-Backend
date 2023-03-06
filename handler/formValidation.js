@@ -43,12 +43,13 @@ export const validateEditEmployee = [
         }
         return true;
     }),
-    body('photo_url').custom((value, { req }) => {
-        if (req.file === undefined) {
-            if (req.body.photo_url === undefined) {
-                throw new Error('Photo must be uploaded');
-            }
-        }
-        return true;
-    })
+    // body('photo_url').custom((value, { req }) => {
+    //     if (req.file === undefined) {
+    //         if (req.body.photo_url === undefined) {
+    //             throw new Error('Photo must be uploaded');
+    //         }
+    //     }
+    //     return true;
+    // })
+    body('photo_url').optional()
 ]

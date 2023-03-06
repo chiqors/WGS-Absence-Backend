@@ -4,8 +4,10 @@ import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
 import helper from '../handler/helper.js';
 import { PrismaClient } from '@prisma/client'
-import { verify } from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+
 const prisma = new PrismaClient()
+const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS);
 faker.locale = 'id_ID'; 
 dayjs.locale('id');
 dayjs.extend(utc);
@@ -27,6 +29,9 @@ export const generateInsertEmployeeQuery = async(num) => {
         const joined_at = dayjs(faker.date.between(
             '2020-01-01T00:00:00.000Z', '2023-02-25T00:00:00.000Z'
         )).toISOString()
+        const password = faker.internet.password();
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(password, salt);
         await prisma.employee.create({
             data: {
                 job: {
@@ -34,7 +39,6 @@ export const generateInsertEmployeeQuery = async(num) => {
                         id: jobIds[Math.floor(Math.random() * jobIds.length)].id
                     }
                 },
-                job_id: jobIds[helper.randomIntFromInterval(0, jobIds.length - 1)].id,
                 full_name: faker.name.fullName(),
                 gender: faker.name.sex(),
                 phone: faker.phone.number('08##########'),
@@ -46,7 +50,7 @@ export const generateInsertEmployeeQuery = async(num) => {
                     create: {
                         email: faker.internet.email(),
                         username: faker.internet.userName(),
-                        password: faker.internet.password(),
+                        password: hashedPassword,
                         role: 'employee'
                     }
                 }
@@ -283,6 +287,9 @@ export const generateInsertAdminQuery = async() => {
     if (findAndGetHrdJob) {
         jobId = findAndGetHrdJob.id
     }
+    const password = 'admin123';
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hashedPassword = await bcrypt.hash(password, salt);
     const admin = {
         job_id: jobId,
         full_name: 'Risa Yunita',
@@ -294,10 +301,10 @@ export const generateInsertAdminQuery = async() => {
         photo_url: 'https://cdn.discordapp.com/attachments/1023968763432943650/1080692752439844874/hr_1.png',
         account: {
             email: 'fathoniplay@gmail.com',
-            username: 'risayunita',
-            password: 'risayunita',
+            username: 'admin',
+            password: hashedPassword,
             role: 'admin',
-            verify: true,
+            verified: 'verified'
         }
     }
     await prisma.employee.create({
@@ -319,7 +326,8 @@ export const generateInsertAdminQuery = async() => {
                     email: admin.account.email,
                     username: admin.account.username,
                     password: admin.account.password,
-                    role: admin.account.role
+                    role: admin.account.role,
+                    verified: admin.account.verified,
                 }
             }
         }

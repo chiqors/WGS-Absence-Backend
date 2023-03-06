@@ -8,9 +8,9 @@ import { avatarUpload } from '../handler/fileUpload.js';
 import sendMail from '../handler/mail.js';
 
 // Import Controllers for API routes
-import authController from '../controllers/authController.js';
 import employeeController from '../controllers/employeeController.js';
 import jobController from '../controllers/jobController.js';
+import dutyController from '../controllers/dutyController.js';
 import attendanceController from '../controllers/attendanceController.js';
 
 // Global variables
@@ -106,13 +106,20 @@ router.get('/job/:id', jobController.show);
 router.put('/job/:id', jobController.update);
 router.delete('/job/:id', jobController.destroy);
 
+// Duty API routes
+router.get('/duty', dutyController.index);
+router.get('/duty/getAllDutyNotAssignedWithJobId/:job_id', dutyController.getAllDutyNotAssignedWithJobId);
+
 // Attendance API routes
 router.get('/attendance', attendanceController.index);
-router.post('/attendance', attendanceController.store);
+router.get('/attendance/latest')
+router.post('/attendance/checkin/status', attendanceController.checkInStatus);
+router.post('/attendance/checkin', attendanceController.checkIn);
+router.put('/attendance/checkout', attendanceController.checkOut);
+router.get('/attendance/prevlist/employee/:employee_id', attendanceController.showAllForSpecificEmployeePrevList);
 router.get('/attendance/:id', attendanceController.show);
 router.get('/attendance/date/:date', attendanceController.showAllForSpecificDate);
 router.get('/attendance/employee/:employee_id', attendanceController.showAllForSpecificEmployee);
-router.put('/attendance/:id', attendanceController.update);
-router.delete('/attendance/:id', attendanceController.destroy);
+
 
 export default router;
