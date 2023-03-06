@@ -83,11 +83,11 @@ model Duty {
 }
 
 model Attendance {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   employee_id Int
   duty_id     Int
-  time_in     DateTime @default(now()) @db.Timestamptz(3)
-  time_out    DateTime @default(now()) @db.Timestamptz(3)
+  time_in     DateTime  @default(now()) @db.Timestamptz(3)
+  time_out    DateTime?
 
   employee Employee @relation(fields: [employee_id], references: [id])
   duty     Duty     @relation(fields: [duty_id], references: [id])

@@ -80,5 +80,6 @@ export default {
     login,
     googleOauth,
     verifyEmail,
-    forgotPassword
+    forgotPassword,
+    resetPassword,
 }
