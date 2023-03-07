@@ -12,6 +12,7 @@ const getEmployeeById = async (id) => {
         },
         include: {
             account: true,
+            oauthaccount: true,
             job: true,
             attendance: {
                 where: {
@@ -495,6 +496,46 @@ const deactivateEmployee = async (id) => {
     })
 }
 
+const googleOauthLink = async (data) => {
+    return await prisma.oAuthAccount.create({
+        data: {
+            employee: {
+                connect: {
+                    id: data.employee_id
+                }
+            },
+            provider: 'google',
+            token: data.access_token,
+            email: data.email,
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+}
+
+const googleOauthUnlink = async (id) => {
+    return await prisma.oAuthAccount.delete({
+        where: {
+            id: id
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+}
+
+const googleOauthData = async (employee_id) => {
+    // get oauth data with google provider
+    const oauthData = await prisma.oAuthAccount.findFirst({
+        where: {
+            employee_id: employee_id,
+            provider: 'google'
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return oauthData
+}
+
 export default {
     getEmployeeById,
     getEmployeeByName,
@@ -512,5 +553,8 @@ export default {
     countAllEmployees,
     storeEmployee,
     updateEmployee,
-    deactivateEmployee
+    deactivateEmployee,
+    googleOauthLink,
+    googleOauthUnlink,
+    googleOauthData
 };
