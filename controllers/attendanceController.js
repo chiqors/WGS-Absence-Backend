@@ -28,6 +28,7 @@ const checkOut = async(req, res) => {
     const payload = {
         employee_id: req.body.employee_id,
         time_out: req.body.time_out,
+        status: req.body.status,
     }
     const data = await Attendance.updateAttendanceWithCheckOut(payload);
     if (data) {
@@ -42,11 +43,7 @@ const checkInStatus = async(req, res) => {
         employee_id: req.body.employee_id,
     }
     const data = await Attendance.getAttendanceStatus(payload.employee_id);
-    if (data) {
-        res.json(data);
-    } else {
-        res.status(404).json({ message: 'Data not found' });
-    }
+    res.json(data);
 }
 
 const show = async(req, res) => {

@@ -102,9 +102,19 @@ const createAttendanceWithCheckIn = async(attendance) => {
             duty: {
                 connect: {
                     id: attendance.duty_id
-                }
+                },
             },
             time_in: attendance.time_in
+        }
+    }).finally(async() => {
+        await prisma.$disconnect()
+    })
+    await prisma.duty.update({
+        where: {
+            id: attendance.duty_id
+        },
+        data: {
+            status: 'assigned'
         }
     }).finally(async() => {
         await prisma.$disconnect()
@@ -130,6 +140,11 @@ const updateAttendanceWithCheckOut = async(attendance) => {
             id: latestAttendance.id
         },
         data: {
+            duty: {
+                update: {
+                    status: attendance.status
+                }
+            },
             time_out: attendance.time_out
         }
     }).finally(async() => {
