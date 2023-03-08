@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 const randomIntFromInterval = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -16,7 +18,8 @@ const generateRandomArray = (min, max, num) => {
 }
 
 const randomDate = (start, end) => {
-    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+    const date = dayjs(start).add(randomIntFromInterval(0, dayjs(end).diff(start, 'day')), 'day');
+    return date;
 }
 
 export default {

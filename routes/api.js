@@ -112,14 +112,15 @@ router.get('/duty/getAllDutyNotAssignedWithJobId/:job_id', dutyController.getAll
 
 // Attendance API routes
 router.get('/attendance', attendanceController.index);
-router.get('/attendance/latest')
 router.post('/attendance/checkin/status', attendanceController.checkInStatus);
 router.post('/attendance/checkin', attendanceController.checkIn);
 router.put('/attendance/checkout', attendanceController.checkOut);
 router.get('/attendance/prevlist/employee/:employee_id', attendanceController.showAllForSpecificEmployeePrevList);
 router.get('/attendance/:id', attendanceController.show);
-router.get('/attendance/date/:date', attendanceController.showAllForSpecificDate);
 router.get('/attendance/employee/:employee_id', attendanceController.showAllForSpecificEmployee);
-
+router.get('/attendance/show/date/:date', attendanceController.showAllForSpecificDate);
+router.get('/attendance/show/weekdays/:week', attendanceController.showAllForWeekdays);
+router.get('/attendance/duty/notcompleted/job/:job_id', attendanceController.showAllDutyNotCompletedForSpecificJob);
+router.get('/attendance/duty/assigned/today/:duty_id', attendanceController.checkIfDutyAssignedToday);
 
 export default router;

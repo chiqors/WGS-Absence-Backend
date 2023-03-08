@@ -8,6 +8,7 @@ router.get('/employee', generateController.generateEmployees);
 router.get('/job', generateController.generateJobs);
 router.get('/duty', generateController.generateDuties);
 router.get('/attendance', generateController.generateAttendances);
+router.get('/attendance/v2', generateController.generateAttendancesV2);
 router.get('/all', generateController.generateAll);
 router.get('/admin', generateController.generateAdmin);
 
