@@ -274,6 +274,93 @@ export const generateInsertAttendanceQuery = async(num) => {
     });
 }
 
+export const generateInsertAttendanceQueryV2 = async() => {
+    // generate fake data
+    const employeeIds = await prisma.employee.findMany({
+        where: {
+            status: 'active'
+        },
+        select: {
+            id: true,
+            job_id: true
+        }
+    })
+    // set attendance date today
+    // set intial time to 00:00:00
+    const date = dayjs().set('hour', 0).set('minute', 0).set('second', 0).tz('Asia/Bangkok').toISOString()
+    // fill any missing attendance for today
+    employeeIds.forEach(async(emp) => {
+        // rules:
+        // 1. if employee has no attendance on that date, create attendance based on employee job for duty
+        // 2. Only one employee can be assigned to one duty with status not_assigned
+        // 3. if duty status is assigned, skip
+        // 4. if duty status is not_assigned, check if attendance already exist for that employee on that date
+        // 5. if attendance already exist, skip
+        
+        // check if attendance already exist for that employee on that date
+        if (await prisma.attendance.findFirst({
+            where: {
+                employee_id: emp.id,
+                time_in: {
+                    gte: dayjs(date).startOf('day').toISOString(),
+                    lte: dayjs(date).endOf('day').toISOString()
+                }
+            }
+        }).finally(async () => {
+            await prisma.$disconnect()
+        })) {
+            return
+        }
+
+        // check if duty status is assigned
+        const duty = await prisma.duty.findFirst({
+            where: {
+                job_id: emp.job_id,
+                status: 'not_assigned'
+            }
+        }).finally(async () => {
+            await prisma.$disconnect()
+        })
+        if (!duty) {
+            return
+        }
+
+        // create attendance based on employee job
+        const time_in = dayjs(date).add(helper.randomIntFromInterval(8, 9), 'hour').add(helper.randomIntFromInterval(0, 59), 'minute').add(helper.randomIntFromInterval(0, 59), 'second').toISOString()
+        const time_out = dayjs(date).add(helper.randomIntFromInterval(17, 18), 'hour').add(helper.randomIntFromInterval(0, 59), 'minute').add(helper.randomIntFromInterval(0, 59), 'second').toISOString()
+        await prisma.attendance.create({
+            data: {
+                time_in: time_in,
+                time_out: time_out,
+                employee: {
+                    connect: {
+                        id: emp.id
+                    }
+                },
+                duty: {
+                    connect: {
+                        id: duty.id
+                    }
+                },
+            }
+        }).finally(async () => {
+            await prisma.$disconnect()
+        })
+
+        // update duty status to assigned once attendance created
+        await prisma.duty.update({
+            where: {
+                id: duty.id
+            },
+            data: {
+                status: 'assigned'
+            }
+        }).finally(async () => {
+            await prisma.$disconnect()
+        })
+    });
+}
+
 export const generateInsertAdminQuery = async() => {
     let jobId = null;
     const findAndGetHrdJob = await prisma.job.findFirst({

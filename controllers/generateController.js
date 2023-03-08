@@ -1,4 +1,4 @@
-import {generateInsertEmployeeQuery,generateInsertJobQuery,generateInsertDutyQuery,generateInsertAttendanceQuery,generateInsertAdminQuery} from '../models/generateModel.js';
+import {generateInsertEmployeeQuery,generateInsertJobQuery,generateInsertDutyQuery,generateInsertAttendanceQuery,generateInsertAdminQuery,generateInsertAttendanceQueryV2} from '../models/generateModel.js';
 
 const generateEmployees = async(req, res) => {
     generateInsertEmployeeQuery(20);
@@ -35,11 +35,18 @@ const generateAdmin = async(req, res) => {
     res.send('Generate admin success');
 }
 
+const generateAttendancesV2 = async(req, res) => {
+    generateInsertAttendanceQueryV2();
+    console.log('Generate attendances for today success');
+    res.send('Generate attendances success');
+}
+
 export default {
     generateEmployees,
     generateJobs,
     generateDuties,
     generateAttendances,
     generateAll,
-    generateAdmin
+    generateAdmin,
+    generateAttendancesV2
 }
