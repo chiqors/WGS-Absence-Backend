@@ -1,5 +1,7 @@
+import { BACKEND_URL } from "../config.js";
+
 const mailUpdateEmail = (name, token) => {
-    const hostVerify = `${process.env.HOST_URL}/auth/verify`;
+    const hostVerify = `${BACKEND_URL}/auth/verify-email`;
     const host = `${process.env.APP_NAME}`;
 
     return `

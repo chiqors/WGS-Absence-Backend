@@ -1,6 +1,7 @@
 import Employee from '../models/employeeModel.js';
 import axios from 'axios';
 import logger from '../utils/logger.js';
+import { FRONTEND_URL } from '../config.js';
 import jwt_decode from 'jwt-decode';
 
 const login = async(req, res) => {
@@ -45,7 +46,7 @@ const verifyEmail = async (req, res) => {
     const token = req.query.code;
     await Employee.verifyEmail(token).then((data) => {
         console.log(data);
-        res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?verified=true`);
+        res.redirect(`${FRONTEND_URL}/login`);
     }).catch((err) => {
         console.log(err);
         const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl

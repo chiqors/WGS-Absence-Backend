@@ -17,7 +17,10 @@ import logger from './utils/logger.js';
 // Global variables and Initialization
 dotenv.config();
 const app = express();
-const port = process.env.PORT || 3001;
+const checkProductionMode = process.env.PRODUCTION_MODE === 'true'
+const checkNgrokMode = process.env.NGROK_MODE === 'true'
+// remove http for express listen in production mode
+const listenUrl = process.env.BACKEND_PRODUCTION_URL.replace('https://', ''); 
 
 // 1. Middleware for parsing JSON and urlencoded data
 app.use(express.json());
@@ -48,6 +51,23 @@ app.use((req, res, next) => {
     res.status(404).send('Sorry cant find that!');
 });
 
-app.listen(port, () => {
-    console.log(`${process.env.APP_NAME} listening on port ${port}`)
-});
+if (checkNgrokMode) {
+    if (checkProductionMode) {
+        console.error('Ngrok mode is enabled. Please disable it in .env file')
+        process.exit(1)
+    }
+    app.listen(process.env.BACKEND_PORT, () => {
+        console.log(`${process.env.APP_NAME} listening on port ${process.env.BACKEND_PORT} from ${process.env.BACKEND_DEVELOPMENT_URL}`)
+        console.log(`Ngrok mode is ${process.env.NGROK_MODE}. Backend is listening on ${process.env.BACKEND_PRODUCTION_URL}`)
+    });
+} else {
+    if (checkProductionMode) {
+        app.listen(process.env.BACKEND_PORT, listenUrl, () => {
+            console.log(`${process.env.APP_NAME} listening on port ${process.env.BACKEND_PORT} from ${process.env.BACKEND_PRODUCTION_URL}`)
+        });
+    } else {
+        app.listen(process.env.BACKEND_PORT, () => {
+            console.log(`${process.env.APP_NAME} listening on port ${process.env.BACKEND_PORT} from ${process.env.BACKEND_DEVELOPMENT_URL}`)
+        });
+    }
+}

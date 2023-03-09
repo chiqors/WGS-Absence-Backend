@@ -1,0 +1,9 @@
+version: "2"
+authtoken: xxxxxxxx
+tunnels:
+  frontend:
+    proto: http
+    addr: 5173
+  backend:
+    proto: http
+    addr: 3000
