@@ -17,23 +17,8 @@ import attendanceController from '../controllers/attendanceController.js';
 const router = express.Router();
 const { expressjwt, ExpressJwtRequest } = express_jwt;
 
-// Testing API routes
-router.get('/', (req, res) => {
-    console.log('GET /api');
-    res.send('GET /api');
-});
-router.post('/', (req, res) => {
-    console.log('POST /api');
-    res.send('POST /api');
-});
-router.put('/', (req, res) => {
-    console.log('PUT /api');
-    res.send('PUT /api');
-});
-router.delete('/', (req, res) => {
-    console.log('DELETE /api');
-    res.send('DELETE /api');
-});
+// Test SMS
+router.get('/send-sms', employeeController.smsTest);
 
 // test upload
 router.post('/upload', avatarUpload.single('uploaded_file'), function (req, res) {

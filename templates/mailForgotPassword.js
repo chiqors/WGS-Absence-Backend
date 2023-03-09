@@ -1,5 +1,7 @@
+import { BACKEND_URL } from "../config.js";
+
 const mailForgotPassword = (token) => {
-    const hostVerify = `${process.env.HOST_URL}/auth/verify`;
+    const hostVerify = `${BACKEND_URL}/auth/reset-password`;
     const host = `${process.env.APP_NAME}`;
 
     return `
@@ -17,4 +19,5 @@ const mailForgotPassword = (token) => {
     </div>
     `
 }
-    
+
+export default mailForgotPassword;

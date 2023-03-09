@@ -1,6 +1,8 @@
+import { BACKEND_URL, APP_NAME } from "../config.js";
+
 const mailWelcome = (name, username, password, code = 123) => {
-    const hostVerify = `${process.env.HOST_URL}/auth/verify`;
-    const host = `${process.env.APP_NAME}`;
+    const hostVerify = `${BACKEND_URL}/auth/verify`;
+    const host = `${APP_NAME}`;
 
     return `
         <h1>Welcome to ${host}</h1>

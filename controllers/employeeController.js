@@ -5,6 +5,7 @@ import fs from 'fs';
 import mailWelcome from '../templates/mailWelcome.js';
 import mailUpdateEmail from '../templates/mailUpdateEmail.js';
 import sendEmail from '../handler/mail.js';
+import clientTwilio from '../handler/sms.js';
 
 const index = async(req, res) => {
     // parse query string to get limit and offset
@@ -141,10 +142,26 @@ const destroy = async(req, res) => {
     }
 }
 
+const smsTest = async(req, res) => {
+    try {
+        const message = await clientTwilio.messages.create({
+            to: '+6281223939528', // Replace with your phone number
+            from: process.env.TWILIO_PHONE_NUMBER, // Replace with your Twilio number
+            body: 'Hello Guest!'
+        });
+        console.log(message.sid);
+        res.send('SMS message sent successfully.');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error sending SMS message.');
+    }
+}
+
 export default {
     index,
     store,
     show,
     update,
-    destroy
+    destroy,
+    smsTest
 };
