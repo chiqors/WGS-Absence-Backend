@@ -3,5 +3,5 @@ logs
 package-lock.json
 .env
 public/uploads
-prisma/migrations
-ngrok.exe
+ngrok/ngrok.exe
+src/utils/db/migrations

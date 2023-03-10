@@ -7,12 +7,12 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 
 // Routes
-import apiRouter from './routes/api.js';
-import genRouter from './routes/gen.js';
-import authRouter from './routes/auth.js';
+import apiRouter from './src/routes/api.js';
+import genRouter from './src/routes/gen.js';
+import authRouter from './src/routes/auth.js';
 
 // Utils
-import logger from './utils/logger.js';
+import logger from './src/utils/logger.js';
 
 // Global variables and Initialization
 dotenv.config();
@@ -20,7 +20,7 @@ const app = express();
 const checkProductionMode = process.env.PRODUCTION_MODE === 'true'
 const checkNgrokMode = process.env.NGROK_MODE === 'true'
 // remove http for express listen in production mode
-const listenUrl = process.env.BACKEND_PRODUCTION_URL.replace('https://', ''); 
+const listenUrl = process.env.BACKEND_PRODUCTION_URL.replace('https://', '');
 
 // 1. Middleware for parsing JSON and urlencoded data
 app.use(express.json());
