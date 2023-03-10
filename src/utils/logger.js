@@ -13,7 +13,7 @@ const saveErrorLog = (err, url, http_method, status_code) => {
     // saving error messages to a file in the logs directory
     let accessLogStream = rfs.createStream('error.log', {
         interval: '1d', // rotate daily
-        path: path.join(__dirname, '../logs')
+        path: path.join(__dirname, '../../logs')
     })
     // write error message with timestamp
     accessLogStream.write(`[${dayjs().format('YYYY-MM-DD HH:mm:ss')}] ${err} = ${url} - ${http_method} | ${status_code}` + '\n');
@@ -23,7 +23,7 @@ const saveMorganLog = () => {
     // saving access messages to a file
     let accessLogStream = rfs.createStream('access.log', {
         interval: '1d', // rotate daily
-        path: path.join(__dirname, '../logs')
+        path: path.join(__dirname, '../../logs')
     })
     return accessLogStream;
 }
