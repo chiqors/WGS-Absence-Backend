@@ -1,12 +1,12 @@
 import Job from '../models/jobModel.js';
 
 const index = async(req, res) => {
-    const data = await Job.getAllJobs();
-    if (data.length > 0) {
-        res.json(data);
-    } else {
-        res.status(404).json({ message: 'Data not found' });
+    const values = {
+        page: parseInt(req.query.page) || 1,
+        limit: parseInt(req.query.limit) || 5
     }
+    const data = await Job.getAllJobsPaginated(values.page, values.limit);
+    res.json(data);
 }
 
 const store = async(req, res) => {
@@ -14,12 +14,9 @@ const store = async(req, res) => {
 }
 
 const show = async(req, res) => {
-    const data = await Job.getJobById(req.params.id);
-    if (data.rows.length > 0) {
-        res.json(data.rows);
-    } else {
-        res.status(404).json({ message: 'Data not found' });
-    }
+    const paramId = parseInt(req.params.id);
+    const data = await Job.getJobById(paramId);
+    res.json(data);
 }
 
 const update = async(req, res) => {
@@ -30,10 +27,17 @@ const destroy = async(req, res) => {
     await Job.deleteJob(req.params.id);
 }
 
+const showDutyAttendanceEmployee = async(req, res) => {
+    const paramJobId = parseInt(req.params.job_id);
+    const data = await Job.getDutyAttendanceEmployee(paramJobId);
+    res.json(data);
+}
+
 export default {
     index,
     store,
     show,
     update,
-    destroy
+    destroy,
+    showDutyAttendanceEmployee
 };
