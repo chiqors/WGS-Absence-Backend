@@ -4,5 +4,5 @@ package-lock.json
 .env
 public/uploads
 ngrok/ngrok.exe
-ngrok/ngrok-config.yml
+ngrok/ngrok_config.yml
 src/utils/db/migrations

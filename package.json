@@ -9,7 +9,7 @@
     "start:ngrok": "pnpm ngrok-start",
     "ngrok-start": "echo \"Don't forget to copy the urls. The command will be run in a few seconds...\" && pnpm ngrok-start:wait && pnpm ngrok-start:run",
     "ngrok-start:wait": "delay 10",
-    "ngrok-start:run": "cd ngrok && ngrok start frontend backend --config=ngrok-config.yml --region=ap"
+    "ngrok-start:run": "cd ngrok && ngrok start frontend backend --config=ngrok_config.yml --region=ap"
   },
   "prisma": {
     "schema": "src/utils/db/schema.prisma",
