@@ -11,6 +11,7 @@ const index = async(req, res) => {
 
 const store = async(req, res) => {
     await Job.storeJob(req.body);
+    return res.status(201).json({ message: 'Job created' });
 }
 
 const show = async(req, res) => {
@@ -21,6 +22,7 @@ const show = async(req, res) => {
 
 const update = async(req, res) => {
     await Job.updateJob(req.body);
+    return res.status(201).json({ message: 'Job updated' });
 }
 
 const destroy = async(req, res) => {
