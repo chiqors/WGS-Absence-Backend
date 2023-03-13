@@ -19,7 +19,34 @@ const getAllDutyNotAssignedWithJobId = async(req, res) => {
     }
 }
 
+const store = async(req, res) => {
+    req.body.job_id = parseInt(req.body.job_id)
+    await Duty.storeDuty(req.body);
+    return res.status(201).json({ message: 'Duty created' });
+}
+
+const show = async(req, res) => {
+    const paramId = parseInt(req.params.id);
+    const data = await Duty.getDutyById(paramId);
+    res.json(data);
+}
+
+const update = async(req, res) => {
+    const values = {
+        id: parseInt(req.params.id),
+        name: req.body.name,
+        description: req.body.description,
+        duration_type: req.body.duration_type,
+        status: req.body.status
+    }
+    await Duty.updateDuty(values);
+    return res.status(201).json({ message: 'Duty updated' });
+}
+
 export default {
     index,
     getAllDutyNotAssignedWithJobId,
+    store,
+    show,
+    update
 }

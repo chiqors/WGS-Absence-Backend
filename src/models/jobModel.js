@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import dayjs from 'dayjs'
 const prisma = new PrismaClient()
 
 const getJobById = async (id) => {
@@ -48,7 +49,11 @@ const updateJob = async (job) => {
         where: {
             id: job.id
         },
-        data: job
+        data: {
+            name: job.name,
+            description: job.description,
+            updated_at: dayjs().format('YYYY-MM-DD HH:mm:ss')
+        }
     }).finally(async () => {
         await prisma.$disconnect()
     })

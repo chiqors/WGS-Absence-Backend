@@ -94,6 +94,9 @@ router.get('/job/duty-attendance-employee/:job_id', jobController.showDutyAttend
 
 // Duty API routes
 router.get('/duty', dutyController.index);
+router.post('/duty', dutyController.store);
+router.get('/duty/:id', dutyController.show);
+router.put('/duty/:id', dutyController.update);
 router.get('/duty/getAllDutyNotAssignedWithJobId/:job_id', dutyController.getAllDutyNotAssignedWithJobId);
 
 // Attendance API routes
