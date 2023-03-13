@@ -185,8 +185,8 @@ const getAllAttendancesWeekly = async(week) => {
     const attendances = await prisma.attendance.findMany({
         where: {
             time_in: {
-                gte: dayjs().startOf('week').add(week, 'week').toDate(),
-                lte: dayjs().endOf('week').add(week, 'week').toDate()
+                gte: dayjs().startOf('week').subtract(week, 'week').toDate(),
+                lte: dayjs().endOf('week').subtract(week, 'week').toDate()
             }
         },
         select: {
