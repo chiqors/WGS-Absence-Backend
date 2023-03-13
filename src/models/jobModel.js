@@ -66,6 +66,86 @@ const deleteJob = async (id) => {
     return deleteJob
 }
 
+const getAllJobsPaginated = async (page, limit) => {
+    const total_data = await prisma.job.count();
+    const total_page = Math.ceil(total_data / limit);
+    const current_page = page;
+    const data = await prisma.job.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: {
+            id: 'desc'
+        },
+        select: {
+            id: true,
+            name: true,
+            description: true,
+            created_at: true,
+            employee: {
+                where: {
+                    status: 'active'
+                },
+                select: {
+                    id: true,
+                }
+            },
+            duty: {
+                where: {
+                    status: {
+                        not: 'completed'
+                    }
+                },
+                select: {
+                    id: true,
+                }
+            }
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+
+    return {
+        total_data,
+        total_page,
+        current_page,
+        data
+    }
+}
+
+const getDutyAttendanceEmployee = async (id) => {
+    // get all duty attendance by job id with employee who is the last has assigned the duty
+    const dutyAttendance = await prisma.duty.findMany({
+        where: {
+            job_id: id
+        },
+        select: {
+            id: true,
+            name: true,
+            description: true,
+            created_at: true,
+            updated_at: true,
+            status: true,
+            attendance: {
+                orderBy: {
+                    id: 'desc'
+                },
+                select: {
+                    id: true,
+                    employee: {
+                        select: {
+                            full_name: true,
+                        }
+                    }
+                },
+                take: 1
+            }
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return dutyAttendance
+}
+
 export default {
     getJobById,
     getJobByName,
@@ -73,4 +153,6 @@ export default {
     storeJob,
     updateJob,
     deleteJob,
+    getAllJobsPaginated,
+    getDutyAttendanceEmployee
 };

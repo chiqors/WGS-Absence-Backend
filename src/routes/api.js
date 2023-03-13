@@ -90,6 +90,7 @@ router.post('/job', jobController.store);
 router.get('/job/:id', jobController.show);
 router.put('/job/:id', jobController.update);
 router.delete('/job/:id', jobController.destroy);
+router.get('/job/duty-attendance-employee/:job_id', jobController.showDutyAttendanceEmployee);
 
 // Duty API routes
 router.get('/duty', dutyController.index);
