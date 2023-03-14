@@ -30,7 +30,8 @@ enum Gender {
 
 enum DurationType {
   full_time
-  bussiness_trip
+  business_trip
+  part_time
 }
 
 enum Role {
