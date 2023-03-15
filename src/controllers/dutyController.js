@@ -1,12 +1,16 @@
 import Duty from '../models/dutyModel.js';
 
 const index = async(req, res) => {
-    const data = await Duty.getAllDuties();
-    if (data.rows.length > 0) {
-        res.json(data.rows);
-    } else {
-        res.status(404).json({ message: 'Data not found' });
+    const values = {
+        page: parseInt(req.query.page) || 1,
+        limit: parseInt(req.query.limit) || 5,
+        job_id: parseInt(req.query.job_id) || null,
+        status: req.query.status || null,
+        updated_at: req.query.updated_at || null,
+        duty_name: req.query.duty_name || null
     }
+    const data = await Duty.getAllDuty(values);
+    res.json(data);
 }
 
 const getAllDutyNotAssignedWithJobId = async(req, res) => {
@@ -43,10 +47,23 @@ const update = async(req, res) => {
     return res.status(201).json({ message: 'Duty updated' });
 }
 
+const getDutyAttendanceAndEmployeeById = async(req, res) => {
+    const dutyId = parseInt(req.params.duty_id);
+    const data = await Duty.getDutyAttendanceAndEmployeeById(dutyId);
+    res.json(data);
+}
+
+const getAllJobs = async(req, res) => {
+    const data = await Duty.getAllJobs();
+    res.json(data);
+}
+
 export default {
     index,
     getAllDutyNotAssignedWithJobId,
+    getDutyAttendanceAndEmployeeById,
     store,
     show,
-    update
+    update,
+    getAllJobs
 }
