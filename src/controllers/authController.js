@@ -132,6 +132,17 @@ const googleOauthData = async (req, res) => {
     }
 }
 
+const getAuthById = async (req, res) => {
+    const data = await Employee.getAuthById(req.params.id);
+    if (data) {
+        res.status(200).json({ data });
+    } else {
+        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+        logger.saveErrorLog('Internal Server Error', fullUrl, 'GET', 500);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
 export default {
     login,
     googleOauth,
@@ -140,5 +151,6 @@ export default {
     resetPassword,
     googleOauthLink,
     googleOauthUnlink,
-    googleOauthData
+    googleOauthData,
+    getAuthById
 }

@@ -12,6 +12,7 @@ import employeeController from '../controllers/employeeController.js';
 import jobController from '../controllers/jobController.js';
 import dutyController from '../controllers/dutyController.js';
 import attendanceController from '../controllers/attendanceController.js';
+import logController from '../controllers/logController.js';
 
 // Global variables
 const router = express.Router();
@@ -76,6 +77,10 @@ router.use((err, req, res, next) => {
         next();
     }
 });
+
+// Log API routes
+router.get('/log/access', logController.getAccessLog);
+router.get('/log/error', logController.getErrorLog);
 
 // Employee API routes
 router.get('/employee', employeeController.index);

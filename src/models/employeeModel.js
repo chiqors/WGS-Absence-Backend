@@ -536,6 +536,24 @@ const googleOauthData = async (employee_id) => {
     return oauthData
 }
 
+const getAuthById = async (id) => {
+    const auth = await prisma.account.findUnique({
+        where: {
+            id: id
+        },
+        include: {
+            employee: {
+                include: {
+                    job: true
+                }
+            }
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return auth
+}
+
 export default {
     getEmployeeById,
     getEmployeeByName,
@@ -556,5 +574,6 @@ export default {
     deactivateEmployee,
     googleOauthLink,
     googleOauthUnlink,
-    googleOauthData
+    googleOauthData,
+    getAuthById
 };
