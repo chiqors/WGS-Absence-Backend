@@ -21,7 +21,7 @@ const sendEmail = async (data) => {
 
     // send email
     const mailOptions = {
-      from: `${app_name} <${process.env.MAIL_USER}>`,
+      from: `"${app_name}" <${process.env.MAIL_USER}>`,
       to: data.to,
       subject: `[${app_name_uppercase}] ${data.subject}`,
       text: data.description,
@@ -29,9 +29,7 @@ const sendEmail = async (data) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log(`Email sent`);
     return info.response;
-
   } catch (error) {
     console.error(error);
     return error;

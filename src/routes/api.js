@@ -8,6 +8,7 @@ import { avatarUpload } from '../handler/fileUpload.js';
 import sendMail from '../handler/mail.js';
 
 // Import Controllers for API routes
+import dashboardController from '../controllers/dashboardController.js';
 import employeeController from '../controllers/employeeController.js';
 import jobController from '../controllers/jobController.js';
 import dutyController from '../controllers/dutyController.js';
@@ -78,14 +79,18 @@ router.use((err, req, res, next) => {
     }
 });
 
+// Dashboard API routes
+router.get('/dashboard/data', dashboardController.getDashboardData);
+
 // Log API routes
 router.get('/log/access', logController.getAccessLog);
 router.get('/log/error', logController.getErrorLog);
 
 // Employee API routes
 router.get('/employee', employeeController.index);
+router.get('/employee/getAllJobsForSelectBox', employeeController.getAllJobsForSelect);
 router.post('/employee', avatarUpload.single('photo_file'), validateCreateEmployee, employeeController.store);
-router.get('/employee/:id', employeeController.show);
+router.get('/employee/show/:id', employeeController.show);
 router.put('/employee/:id', avatarUpload.single('photo_file'), validateEditEmployee, employeeController.update);
 router.delete('/employee/:id', employeeController.destroy);
 
@@ -112,7 +117,6 @@ router.post('/attendance/checkin/status', attendanceController.checkInStatus);
 router.post('/attendance/checkin', attendanceController.checkIn);
 router.put('/attendance/checkout', attendanceController.checkOut);
 router.get('/attendance/prevlist/employee/:employee_id', attendanceController.showAllForSpecificEmployeePrevList);
-router.get('/attendance/:id', attendanceController.show);
 router.get('/attendance/employee/:employee_id', attendanceController.showAllForSpecificEmployee);
 router.get('/attendance/show/date/:date', attendanceController.showAllForSpecificDate);
 router.get('/attendance/show/weekdays/:week', attendanceController.showAllForWeekdays);

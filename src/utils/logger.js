@@ -25,14 +25,14 @@ const saveErrorLogV2 = (log) => {
         interval: '1d', // rotate daily
         path: path.join(__dirname, '../../logs')
     })
-    if (log.stackTrace) {
+    if (log.isStackTrace) {
         // Replace newline characters with a space
         const stackTraceOneLine = log.message.replace(/\n/g, ' ');
         // write error message with timestamp
         accessLogStream.write(`[${dayjs().format('YYYY-MM-DD HH:mm:ss')}] | [${log.level}] | ${log.isStackTrace} | ${stackTraceOneLine} | ${log.server} | ${log.urlPath} | ${log.lastHost} | ${log.method} | ${log.status}\n`);
     } else {
         // write error message with timestamp
-        accessLogStream.write(`[${dayjs().format('YYYY-MM-DD HH:mm:ss')}] | [${log.level}] | ${log.message} | ${log.server} | ${log.urlPath} | ${log.lastHost} | ${log.method} | ${log.status}\n`);
+        accessLogStream.write(`[${dayjs().format('YYYY-MM-DD HH:mm:ss')}] | [${log.level}] | false | ${log.message} | ${log.server} | ${log.urlPath} | ${log.lastHost} | ${log.method} | ${log.status}\n`);
     }
 }
 

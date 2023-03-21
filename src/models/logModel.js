@@ -62,15 +62,19 @@ const getAllAccessLog = async (data) => {
     }
     // get total number of logs
     const totalData = accessLogs.length;
-    // get total number of pages
+    // sort the logs by time descending
+    accessLogs.sort((a, b) => {
+        return new Date(b.time) - new Date(a.time);
+    });
+    // get the total page
     const totalPage = Math.ceil(totalData / data.limit);
-    // get current page
+    // get the current page
     const currentPage = data.page;
-    // get start index
+    // get the start index
     const startIndex = (data.page - 1) * data.limit;
-    // get end index
+    // get the end index
     const endIndex = data.page * data.limit;
-    // get data
+    // get the data
     const dataResult = accessLogs.slice(startIndex, endIndex);
     // return the result
     return { totalData, totalPage, currentPage, data: dataResult };
@@ -116,6 +120,10 @@ const getAllErrorLog = async (data) => {
     }
     // get the total data
     const totalData = errorLogs.length;
+    // sort the logs by time descending
+    errorLogs.sort((a, b) => {
+        return new Date(b.time) - new Date(a.time);
+    });
     // get the total page
     const totalPage = Math.ceil(totalData / data.limit);
     // get the current page

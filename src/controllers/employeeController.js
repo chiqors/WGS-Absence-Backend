@@ -6,6 +6,7 @@ import mailWelcome from '../templates/mailWelcome.js';
 import mailUpdateEmail from '../templates/mailUpdateEmail.js';
 import sendEmail from '../handler/mail.js';
 import clientTwilio from '../handler/sms.js';
+import employeeModel from '../models/employeeModel.js';
 
 const index = async(req, res) => {
     // parse query string to get limit and offset
@@ -31,8 +32,15 @@ const index = async(req, res) => {
 const store = async(req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-        logger.saveErrorLog('Validation Error', fullUrl, 'POST', 422);
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            message: 'Validation Error on Create Employee',
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 422
+        })
         return res.status(422).json({ errors: errors.array() });
     }
     if (req.file) {
@@ -41,10 +49,21 @@ const store = async(req, res) => {
     }
     req.body.birthdate = new Date(req.body.birthdate);
     req.body.job_id = parseInt(req.body.job_id);
+    if (!req.body.photo_url) {
+        // use default avatar
+        req.body.photo_url = "https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/581.jpg"
+    }
     const token = await Employee.storeEmployee(req.body).catch((err) => {
-        console.log(err);
-        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-        logger.saveErrorLog(err, fullUrl, 'POST', 500);
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            isStackTrace: true,
+            message: err.message,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 500
+        })
         return res.status(500).json({ message: 'Internal Server Error' });
     });
     const mailData = {
@@ -53,8 +72,31 @@ const store = async(req, res) => {
         description: 'Welcome! This email is for your email verification.',
         body: mailWelcome(req.body.full_name, req.body.username, req.body.password, token)
     }
-    await sendEmail(mailData);
-    return res.status(201).json({ message: 'submitted' });
+    try {
+        await sendEmail(mailData);
+        logger.saveLog({
+            level: 'ACC',
+            message: `Email verification has been sent to ${req.body.email}`,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 201
+        })
+        return res.status(201).json({ message: 'submitted' });
+    } catch (err) {
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            isStackTrace: true,
+            message: err.message,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 500
+        })
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
 }
 
 const show = async(req, res) => {
@@ -73,8 +115,15 @@ const update = async(req, res) => {
     const paramsId = parseInt(req.params.id);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-        logger.saveErrorLog('Validation Error', fullUrl, 'PUT', 422);
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            message: 'Validation Error on Update Employee',
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 422
+        })
         return res.status(422).json({ errors: errors.array() });
     }
     const old_data = await Employee.getEmployeeById(paramsId);
@@ -111,11 +160,27 @@ const update = async(req, res) => {
     req.body.birthdate = new Date(req.body.birthdate);
     req.body.job_id = parseInt(req.body.job_id);
     await Employee.updateEmployee(req.body).catch((err) => {
-        console.log(err);
-        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-        logger.saveErrorLog(err, fullUrl, 'POST', 500);
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            isStackTrace: true,
+            message: err.message,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 500
+        })
         return res.status(500).json({ message: 'Internal Server Error' });
     });
+    logger.saveLog({
+        level: 'ACC',
+        message: 'Employee Updated for ID: ' + paramsId,
+        server: 'BACKEND',
+        urlPath: req.originalUrl,
+        lastHost: req.headers.host,
+        method: req.method,
+        status: 201
+    })
     return res.status(201).json({ message: 'updated' });
 }
 
@@ -126,18 +191,71 @@ const destroy = async(req, res) => {
         const username = data.account.username;
         if (fs.existsSync(`public/uploads/${username}`)) {
             fs.rm(`public/uploads/${username}`, { recursive: true });
-            console.log('avatar and user folder has been deleted')
+            logger.saveErrorLogV2({
+                level: 'ACC',
+                message: 'Employee Avatar and Folder Deleted for ID: ' + paramsId,
+                server: 'BACKEND',
+                urlPath: req.originalUrl,
+                lastHost: req.headers.host,
+                method: req.method,
+                status: 201
+            })
         }
-        await Employee.deleteEmployee(paramsId).catch((err) => {
-            console.log(err);
-            const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-            logger.saveErrorLog(err, fullUrl, 'DELETE', 500);
-            res.status(500).json({ message: 'Internal Server Error' });
-        });
-        return res.status(201).json({ message: 'deleted' });
+        await Employee.deactivateEmployee(paramsId)
+            .then(() => {
+                logger.saveLog({
+                    level: 'ACC',
+                    message: 'Employee Deactivated for ID: ' + paramsId,
+                    server: 'BACKEND',
+                    urlPath: req.originalUrl,
+                    lastHost: req.headers.host,
+                    method: req.method,
+                    status: 201
+                })
+                console.log('Employee Deactivated');
+                return res.status(201).json({ message: 'deleted' });
+            })
+            .catch((err) => {
+                logger.saveErrorLogV2({
+                    level: 'ERR',
+                    isStackTrace: true,
+                    message: err.message,
+                    server: 'BACKEND',
+                    urlPath: req.originalUrl,
+                    lastHost: req.headers.host,
+                    method: req.method,
+                    status: 500
+                })
+                return res.status(500).json({ message: 'Internal Server Error' });
+            });
     } else {
-        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-        logger.saveErrorLog('Employee not found', fullUrl, 'DELETE', 404);
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            message: 'Employee not found for ID: ' + paramsId,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 404
+        })
+        res.status(404).json({ message: 'Data not found' });
+    }
+}
+
+const getAllJobsForSelect = async(req, res) => {
+    const data = await employeeModel.getAllJobsForSelect();
+    if (data) {
+        res.json(data);
+    } else {
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            message: 'Job not found',
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 404
+        })
         res.status(404).json({ message: 'Data not found' });
     }
 }
@@ -163,5 +281,6 @@ export default {
     show,
     update,
     destroy,
+    getAllJobsForSelect,
     smsTest
 };
