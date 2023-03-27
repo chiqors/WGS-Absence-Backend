@@ -576,6 +576,17 @@ const findEmail = async (email) => {
     return account
 }
 
+const findPhone = async (phone) => {
+    const account = await prisma.employee.findUnique({
+        where: {
+            phone: phone
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return account
+}
+
 export default {
     getEmployeeById,
     getEmployeeByName,
@@ -599,5 +610,6 @@ export default {
     googleOauthData,
     getAuthById,
     getAllJobsForSelect,
-    findEmail
+    findEmail,
+    findPhone
 };

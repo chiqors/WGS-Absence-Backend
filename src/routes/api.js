@@ -80,7 +80,9 @@ router.use((err, req, res, next) => {
 });
 
 // Dashboard API routes
-router.get('/dashboard/data', dashboardController.getDashboardData);
+router.get('/dashboard/cards', dashboardController.getDashboardCards);
+router.get('/dashboard/top-attendances', dashboardController.getTopAttendance);
+router.get('/dashboard/average-attendance', dashboardController.getGraphAveragePresence);
 
 // Log API routes
 router.get('/log/access', logController.getAccessLog);
