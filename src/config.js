@@ -12,7 +12,7 @@ export const FRONTEND_URL = (process.env.NGROK_MODE === 'true') ?
 
 export const BACKEND_URL = (process.env.PRODUCTION_MODE === 'true') ? 
     process.env.BACKEND_PRODUCTION_URL : 
-    process.env.BACKEND_DEVELOPMENT_URL;
+    process.env.BACKEND_DEVELOPMENT_URL+':'+process.env.BACKEND_PORT;
 
 export const PORT = (process.env.PRODUCTION_MODE === 'true') ? 
     process.env.BACKEND_PORT : 

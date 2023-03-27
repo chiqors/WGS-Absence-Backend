@@ -55,15 +55,30 @@ const getAllAttendancesForSpecificEmployee = async(employee_id) => {
 
 const getAllAttendancesForSpecificEmployeeBeforeLatest = async(employee_id) => {
     // should return all attendances on this week only before the latest attendance
+    // const attendances = await prisma.attendance.findMany({
+    //     orderBy: {
+    //         id: 'desc'
+    //     },
+    //     skip: 1,
+    //     where: {
+    //         employee_id: employee_id,
+    //         time_in: {
+    //             gte: new Date(new Date().setDate(new Date().getDate() - 7))
+    //         }
+    //     },
+    //     include: {
+    //         duty: true
+    //     }
+    // }).finally(async() => {
+    //     await prisma.$disconnect()
+    // })
+    // should return all attendances on this week
     const attendances = await prisma.attendance.findMany({
+        orderBy: {
+            id: 'desc'
+        },
         where: {
             employee_id: employee_id,
-            time_in: {
-                gte: new Date(new Date().setDate(new Date().getDate() - 7))
-            },
-            time_out: {
-                not: null
-            }
         },
         include: {
             duty: true
@@ -248,29 +263,61 @@ const getAllAttendancesWeekly = async(week) => {
 
 const getAllDutyNotCompletedForJobId = async(jobId) => {
     // get all attendances for specific job that not completed their duty
-    const attendances = await prisma.attendance.findMany({
+    // const attendances = await prisma.attendance.findMany({
+    //     where: {
+    //         duty: {
+    //             job_id: jobId,
+    //             status: {
+    //                 not: 'completed'
+    //             }
+    //         }
+    //     },
+    //     select: {
+    //         employee: {
+    //             select: {
+    //                 full_name: true
+    //             }
+    //         },
+    //         time_in: true,
+    //         time_out: true,
+    //         duty: true
+    //     }
+    // }).finally(async() => {
+    //     await prisma.$disconnect()
+    // })
+    // return attendances
+
+    const dutyNotCompleted = await prisma.duty.findMany({
         where: {
-            duty: {
-                job_id: jobId,
-                status: {
-                    not: 'completed'
-                }
+            job_id: jobId,
+            status: {
+                notIn: ['completed', 'not_assigned']
             }
         },
         select: {
-            employee: {
+            id: true,
+            name: true,
+            status: true,
+            attendance: {
+                orderBy: {
+                    id: 'desc'
+                },
+                take: 1,
                 select: {
-                    full_name: true
+                    employee: {
+                        select: {
+                            full_name: true
+                        }
+                    },
+                    time_in: true,
+                    time_out: true
                 }
-            },
-            time_in: true,
-            time_out: true,
-            duty: true
+            }
         }
     }).finally(async() => {
         await prisma.$disconnect()
     })
-    return attendances
+    return dutyNotCompleted
 }
 
 const checkIfDutyAssignedToday = async(duty_id) => {

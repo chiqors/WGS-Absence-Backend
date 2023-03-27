@@ -390,6 +390,10 @@ const storeEmployee = async (employee) => {
     const saltRound = parseInt(process.env.BCRYPT_SALT_ROUNDS)
     const salt = await bcrypt.genSalt(saltRound)
     const passwordHashed = await bcrypt.hash(employee.password, salt)
+    if (!employee.photo_url) {
+        // set default photo
+        employee.photo_url = 'https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/240.jpg'
+    }
     const createdRecord = await prisma.employee.create({
         data: {
             full_name: employee.full_name,
@@ -482,14 +486,9 @@ const deactivateEmployee = async (id) => {
             status: 'inactive',
             account: {
                 update: {
-                    status: false
+                    status: 'inactive'
                 }
             },
-            oauthaccount: {
-                update: {
-                    status: false
-                }
-            }
         }
     }).finally(async () => {
         await prisma.$disconnect()
@@ -536,6 +535,58 @@ const googleOauthData = async (employee_id) => {
     return oauthData
 }
 
+const getAuthById = async (id) => {
+    const auth = await prisma.account.findUnique({
+        where: {
+            id: id
+        },
+        include: {
+            employee: {
+                include: {
+                    job: true
+                }
+            }
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return auth
+}
+
+const getAllJobsForSelect = async () => {
+    const jobs = await prisma.job.findMany({
+        select: {
+            id: true,
+            name: true
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return jobs
+}
+
+const findEmail = async (email) => {
+    const account = await prisma.account.findUnique({
+        where: {
+            email: email
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return account
+}
+
+const findPhone = async (phone) => {
+    const account = await prisma.employee.findUnique({
+        where: {
+            phone: phone
+        }
+    }).finally(async () => {
+        await prisma.$disconnect()
+    })
+    return account
+}
+
 export default {
     getEmployeeById,
     getEmployeeByName,
@@ -556,5 +607,9 @@ export default {
     deactivateEmployee,
     googleOauthLink,
     googleOauthUnlink,
-    googleOauthData
+    googleOauthData,
+    getAuthById,
+    getAllJobsForSelect,
+    findEmail,
+    findPhone
 };

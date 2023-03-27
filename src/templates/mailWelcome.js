@@ -13,7 +13,7 @@ const mailWelcome = (name, username, password, code = 123) => {
         <a href='${hostVerify}?code=${code}' style="text-decoration: none; color: #fff; background-color: #007bff; border-color: #007bff; padding: 0.375rem 0.75rem; font-size: 1rem; line-height: 1.5; border-radius: 0.25rem; display: inline-block; font-weight: 400; text-align: center; white-space: nowrap; vertical-align: middle; border: 1px solid transparent; cursor: pointer;">
             Verify
         </a>
-        <p>Or use this link: <a href='${hostVerify}?code=${code}'>${hostVerify}?code=${code}</a></p>
+        <p>Or use this link: <a href='${hostVerify}?code=${code}'>${hostVerify}?code=${code}&verified=true</a></p>
         <p>Best regards,</p>
         <span style="font-weight: bold;">WGS Absence</span>
     `;

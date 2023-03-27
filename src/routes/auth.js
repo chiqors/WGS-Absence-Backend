@@ -3,6 +3,7 @@ import authController from "../controllers/authController.js"
 
 const router = express.Router();
 
+router.get("/auth/:id", authController.getAuthById);
 router.post("/login", authController.login);
 router.get("/verify", authController.verifyEmail);
 router.post("/oauth/google/login", authController.googleOauth);

@@ -1,4 +1,5 @@
 import Duty from '../models/dutyModel.js';
+import logger from '../utils/logger.js';
 
 const index = async(req, res) => {
     const values = {
@@ -19,14 +20,46 @@ const getAllDutyNotAssignedWithJobId = async(req, res) => {
     if (data) {
         res.json(data);
     } else {
-        res.status(404).json({ message: 'Data not found' });
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            message: 'Duty Not Assigned With Job cannot be found',
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 404
+        })
+        res.status(404).json({ message: 'Duty Not Assigned With Job cannot be found' });
     }
 }
 
 const store = async(req, res) => {
     req.body.job_id = parseInt(req.body.job_id)
-    await Duty.storeDuty(req.body);
-    return res.status(201).json({ message: 'Duty created' });
+    try {
+        await Duty.storeDuty(req.body);
+        logger.saveLog({
+            level: 'ACC',
+            message: `Duty ${req.body.name} has been created`,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 201
+        })
+        return res.status(201).json({ message: 'Duty created' });
+    } catch (error) {
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            isStackTrace: true,
+            message: error.message,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 500
+        })
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
 }
 
 const show = async(req, res) => {
@@ -43,8 +76,31 @@ const update = async(req, res) => {
         duration_type: req.body.duration_type,
         status: req.body.status
     }
-    await Duty.updateDuty(values);
-    return res.status(201).json({ message: 'Duty updated' });
+    try {
+        await Duty.updateDuty(values);
+        logger.saveLog({
+            level: 'ACC',
+            message: `Duty ${req.body.name} has been updated`,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 201
+        })
+        return res.status(201).json({ message: 'Duty updated' });
+    } catch (error) {
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            isStackTrace: true,
+            message: error.message,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 500
+        })
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
 }
 
 const getDutyAttendanceAndEmployeeById = async(req, res) => {

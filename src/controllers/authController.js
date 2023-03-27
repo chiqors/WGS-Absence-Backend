@@ -7,11 +7,27 @@ import jwt_decode from 'jwt-decode';
 const login = async(req, res) => {
     const data = await Employee.checkAuth(req.body.username, req.body.password);
     if (data) {
+        logger.saveLog({
+            level: 'ACC',
+            message: 'Login Success for username: ' + req.body.username,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 200
+        })
         res.status(200).json({ message: 'You are successfully logged in', token: data  });
     } else {
-        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-        logger.saveErrorLog('Username and Password are invalid', fullUrl, 'POST', 404);
-        res.status(404).json({ message: 'Username and Password are invalid' });
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            message: 'Username or password is incorrect',
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 404
+        })
+        res.status(404).json({ message: 'Username or password is incorrect' });
     }
 }
 
@@ -34,23 +50,54 @@ const googleOauth = async(req, res) => {
         data = await Employee.checkGoogleOauth(decoded);
     }
     if (data) {
+        logger.saveLog({
+            level: 'ACC',
+            message: 'Google Oauth Success',
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 200
+        })
         res.status(200).json({ message: 'You are successfully logged in', token: data  });
     } else {
-        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-        logger.saveErrorLog('Your Google Account does not registered', fullUrl, 'POST', 404);
-        res.status(404).json({ message: 'Your Google Account does not registered' });
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            message: 'Google Oauth Failed',
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 404
+        })
+        res.status(404).json({ message: 'Google Oauth Failed' });
     }
 }
 
 const verifyEmail = async (req, res) => {
     const token = req.query.code;
-    await Employee.verifyEmail(token).then((data) => {
-        console.log(data);
+    await Employee.verifyEmail(token).then(() => {
+        logger.saveLog({
+            level: 'ACC',
+            message: 'Email Verification Success for token: ' + token,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 200
+        })
         res.redirect(`${FRONTEND_URL}/login`);
     }).catch((err) => {
-        console.log(err);
-        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-        logger.saveErrorLog(err, fullUrl, 'GET', 500);
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            isStackTrace: true,
+            message: err.message,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 500
+        })
         res.status(500).json({ message: 'Internal Server Error' });
     });
 }
@@ -58,10 +105,26 @@ const verifyEmail = async (req, res) => {
 const forgotPassword = async (req, res) => {
     const data = await Employee.forgotPassword(req.body.email);
     if (data) {
+        logger.saveLog({
+            level: 'ACC',
+            message: 'Forgot Password Success for email: ' + req.body.email,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 200
+        })
         res.status(200).json({ message: 'Please check your email to reset your password' });
     } else {
-        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-        logger.saveErrorLog('Email is not registered', fullUrl, 'POST', 404);
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            message: 'Email is not registered',
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 404
+        })
         res.status(404).json({ message: 'Email is not registered' });
     }
 }
@@ -69,10 +132,26 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
     const data = await Employee.resetPassword(req.body.token, req.body.password);
     if (data) {
+        logger.saveLog({
+            level: 'ACC',
+            message: 'Reset Password Success for token: ' + req.body.token,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 200
+        })
         res.status(200).json({ message: 'Your password has been changed' });
     } else {
-        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-        logger.saveErrorLog('Token is invalid', fullUrl, 'POST', 404);
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            message: 'Token is invalid: ' + req.body.token,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 404
+        })
         res.status(404).json({ message: 'Token is invalid' });
     }
 }
@@ -90,12 +169,29 @@ const googleOauthLink = async (req, res) => {
         },
     });
     values.email = resp.data.email;
-    const data = await Employee.googleOauthLink(values);
-    if (data) {
+    try {
+        await Employee.googleOauthLink(values);
+        logger.saveLog({
+            level: 'ACC',
+            message: 'Google Account has been linked for Employee ID: ' + values.employee_id,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 200
+        })
         res.status(200).json({ message: 'Google Account has been linked' });
-    } else {
-        const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-        logger.saveErrorLog('Internal Server Error', fullUrl, 'POST', 500);
+    } catch (err) {
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            isStackTrace: true,
+            message: err.message,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 500
+        })
         res.status(500).json({ message: 'Internal Server Error' });
     }
 }
@@ -104,31 +200,97 @@ const googleOauthUnlink = async (req, res) => {
     const values = {
         employee_id: parseInt(req.body.employee_id)
     }
-    // get google oauth data
-    const googleData = await Employee.googleOauthData(values.employee_id);
-    if (googleData) {
-        // unlink google oauth
-        const data = await Employee.googleOauthUnlink(googleData.id);
-        if (data) {
+    try {
+        await Employee.googleOauthUnlink(values.employee_id);
+        try {
+            await Employee.googleOauthUnlink(values.employee_id);
+            logger.saveLog({
+                level: 'ACC',
+                message: 'Google Account has been unlinked for Employee ID: ' + values.employee_id,
+                server: 'BACKEND',
+                urlPath: req.originalUrl,
+                lastHost: req.headers.host,
+                method: req.method,
+                status: 200
+            })
             res.status(200).json({ message: 'Google Account has been unlinked' });
-        } else {
-            const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
-            logger.saveErrorLog('Internal Server Error', fullUrl, 'POST', 500);
+        } catch (err) {
+            logger.saveErrorLogV2({
+                level: 'ERR',
+                isStackTrace: true,
+                message: err.message,
+                server: 'BACKEND',
+                urlPath: req.originalUrl,
+                lastHost: req.headers.host,
+                method: req.method,
+                status: 500
+            })
             res.status(500).json({ message: 'Internal Server Error' });
         }
+    } catch (err) {
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            message: err.message,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 500
+        })
+        res.status(500).json({ message: 'Internal Server Error' });
     }
-
 }
 
 const googleOauthData = async (req, res) => {
     const values = {
         employee_id: parseInt(req.params.employee_id)
     }
-    const data = await Employee.googleOauthData(values.employee_id);
+    try {
+        const data = await Employee.googleOauthData(values.employee_id);
+        if (data) {
+            res.status(200).json({ data });
+        } else {
+            logger.saveErrorLogV2({
+                level: 'ERR',
+                message: 'Oauth Data Not Found',
+                server: 'BACKEND',
+                urlPath: req.originalUrl,
+                lastHost: req.headers.host,
+                method: req.method,
+                status: 500
+            })
+            res.status(200).json({ data: null });
+        }
+    } catch (err) {
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            isStackTrace: true,
+            message: err.message,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 500
+        })
+        res.status(200).json({ data: null });
+    }
+}
+
+const getAuthById = async (req, res) => {
+    const data = await Employee.getAuthById(req.params.id);
     if (data) {
         res.status(200).json({ data });
     } else {
-        res.status(200).json({ data: null });
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            message: 'Internal Server Error',
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 500
+        })
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 }
 
@@ -140,5 +302,6 @@ export default {
     resetPassword,
     googleOauthLink,
     googleOauthUnlink,
-    googleOauthData
+    googleOauthData,
+    getAuthById
 }

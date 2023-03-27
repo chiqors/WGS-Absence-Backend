@@ -5,6 +5,7 @@ import timezone from 'dayjs/plugin/timezone.js';
 import helper from '../handler/helper.js';
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcrypt';
+import logger from '../utils/logger.js';
 
 const prisma = new PrismaClient()
 const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS);
@@ -420,5 +421,143 @@ export const generateInsertAdminQuery = async() => {
         }
     }).finally(async () => {
         await prisma.$disconnect()
+    })
+}
+
+// const fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+// logger.saveErrorLog('Employee not found', fullUrl, 'GET', 404);
+// res.status(404).json({ message: 'Data not found' });
+export const generateInsertErrorLogQuery = async() => {
+    // generate fake error log
+    // [2023-03-16 15:46:23] | [ERROR] | true | Error: not found Line 1:49 .value undefined | BACKEND | /api/v1/employee/1 | http://localhost:3000 | GET | 404
+    const errorLogs = [
+        {
+            level: 'ERROR',
+            isStackTrace: true,
+            message: 'at line 1:49\n .value undefined',
+            server: 'BACKEND',
+            urlPath: '/api/v1/employee/1',
+            lastHost: 'http://localhost:3000',
+            method: 'GET',
+            status: 404
+        },
+        {
+            level: 'ERROR',
+            isStackTrace: false,
+            message: 'Employee ID not found',
+            server: 'BACKEND',
+            urlPath: '/api/v1/employee/1',
+            lastHost: 'http://localhost:3000',
+            method: 'GET',
+            status: 404
+        },
+        {
+            level: 'ERROR',
+            isStackTrace: false,
+            message: 'Employee ID not found',
+            server: 'BACKEND',
+            urlPath: '/api/v1/employee/1',
+            lastHost: 'http://localhost:3000',
+            method: 'GET',
+            status: 404
+        },
+        {
+            level: 'ERROR',
+            isStackTrace: true,
+            message: 'at line 1:49\n .value undefined',
+            server: 'BACKEND',
+            urlPath: '/api/v1/employee/1',
+            lastHost: 'http://localhost:3000',
+            method: 'GET',
+            status: 404
+        },
+        {
+            level: 'ERROR',
+            isStackTrace: false,
+            message: 'Employee ID not found',
+            server: 'BACKEND',
+            urlPath: '/api/v1/employee/1',
+            lastHost: 'http://localhost:3000',
+            method: 'GET',
+            status: 404
+        },
+        {
+            level: 'ERROR',
+            isStackTrace: false,
+            message: 'Employee ID not found',
+            server: 'BACKEND',
+            urlPath: '/api/v1/employee/1',
+            lastHost: 'http://localhost:3000',
+            method: 'GET',
+            status: 404
+        },
+    ]
+    // write and save to error log file
+    errorLogs.forEach((errorLog) => {
+        logger.saveErrorLogV2(errorLog)
+    })
+}
+
+export const generateInsertAccessLogQuery = async() => {
+    // [2023-03-16 15:46:23] | [ACC] | List Employee With Pagination | BACKEND | /api/v1/employee/1 | http://localhost:3000 | GET | 201
+    const accessLogs = [
+        {
+            level: 'ACC',
+            message: 'List Employee With Pagination',
+            server: 'BACKEND',
+            urlPath: '/api/v1/employee/1',
+            lastHost: 'http://localhost:3000',
+            method: 'GET',
+            status: 201
+        },
+        {
+            level: 'ACC',
+            message: 'List Employee With Pagination',
+            server: 'BACKEND',
+            urlPath: '/api/v1/employee/1',
+            lastHost: 'http://localhost:3000',
+            method: 'GET',
+            status: 201
+        },
+        {
+            level: 'ACC',
+            message: 'List Employee With Pagination',
+            server: 'BACKEND',
+            urlPath: '/api/v1/employee/1',
+            lastHost: 'http://localhost:3000',
+            method: 'GET',
+            status: 201
+        },
+        {
+            level: 'ACC',
+            message: 'List Employee With Pagination',
+            server: 'BACKEND',
+            urlPath: '/api/v1/employee/1',
+            lastHost: 'http://localhost:3000',
+            method: 'GET',
+            status: 201
+        },
+        {
+            level: 'ACC',
+            message: 'List Employee With Pagination',
+            server: 'BACKEND',
+            urlPath: '/api/v1/employee/1',
+            lastHost: 'http://localhost:3000',
+            method: 'GET',
+            status: 201
+        },
+        {
+            level: 'ACC',
+            message: 'List Employee With Pagination',
+            server: 'BACKEND',
+            urlPath: '/api/v1/employee/1',
+            lastHost: 'http://localhost:3000',
+            method: 'GET',
+            status: 201
+        }
+    ]
+    // write and save to access log file
+    accessLogs.forEach((accessLog) => {
+        logger.saveLog(accessLog)
     })
 }

@@ -45,6 +45,7 @@ const storeJob = async (job) => {
 }
 
 const updateJob = async (job) => {
+    const now = dayjs().toDate();
     const updateJob = await prisma.job.update({
         where: {
             id: job.id
@@ -52,7 +53,7 @@ const updateJob = async (job) => {
         data: {
             name: job.name,
             description: job.description,
-            updated_at: dayjs().format('YYYY-MM-DD HH:mm:ss')
+            updated_at: now
         }
     }).finally(async () => {
         await prisma.$disconnect()

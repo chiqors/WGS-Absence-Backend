@@ -1,4 +1,5 @@
 import Attendance from '../models/attendanceModel.js';
+import logger from '../utils/logger.js';
 
 const index = async(req, res) => {
     const data = await Attendance.getAllAttendances();
@@ -18,10 +19,27 @@ const checkIn = async(req, res) => {
     }
     const data = await Attendance.createAttendanceWithCheckIn(values);
     if (data) {
-        console.log("success create attendance with check in");
+        logger.saveLog({
+            level: 'ACC',
+            message: 'Create Attendance With Check In For Employee ID: ' + req.body.employee_id,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 201
+        })
         res.json(data);
     } else {
-        res.status(404).json({ message: 'Data not found' });
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            message: 'Failed to create attendance with check in for employee ID: ' + req.body.employee_id,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 500
+        })
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 }
 
@@ -34,9 +52,27 @@ const checkOut = async(req, res) => {
     }
     const data = await Attendance.updateAttendanceWithCheckOut(payload);
     if (data) {
+        logger.saveLog({
+            level: 'ACC',
+            message: 'Update Attendance With Check Out For Employee ID: ' + req.body.employee_id,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 201
+        })
         res.json(data);
     } else {
-        res.status(404).json({ message: 'Data not found' });
+        logger.saveErrorLogV2({
+            level: 'ERR',
+            message: 'Failed to update attendance with check out for employee ID: ' + req.body.employee_id,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 500
+        })
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 }
 
@@ -47,15 +83,6 @@ const checkInStatus = async(req, res) => {
     const data = await Attendance.getAttendanceStatus(payload.employee_id);
     res.json(data);
 }
-
-const show = async(req, res) => {
-    const data = await Attendance.getAttendanceById(req.params.id);
-    if (data.rows.length > 0) {
-        res.json(data.rows);
-    } else {
-        res.status(404).json({ message: 'Data not found' });
-    }
-}   
 
 const showAllForSpecificDate = async(req, res) => {
     const data = await Attendance.getAllAttendancesForSpecificDate(req.params.date);
@@ -123,7 +150,6 @@ export default {
     checkIn,
     checkOut,
     checkInStatus,
-    show,
     showAllForSpecificDate,
     showAllForSpecificEmployeePrevList,
     showAllForSpecificEmployee,
