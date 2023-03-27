@@ -2,6 +2,8 @@ import rfs from 'rotating-file-stream';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import dayjs from 'dayjs';
+import archiver from 'archiver';
+import fs from 'fs';
 
 // Global variables and Initialization
 // get the project directory
@@ -9,20 +11,31 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dayjs.locale('id');
 
-const saveErrorLog = (err, url, http_method, status_code) => {
-    // saving error messages to a file in the logs directory
-    let errorLogStream = rfs.createStream('error.log', {
-        interval: '1d', // rotate daily
-        path: path.join(__dirname, '../../logs')
-    })
-    // write error message with timestamp
-    errorLogStream.write(`[${dayjs().format('YYYY-MM-DD HH:mm:ss')}] ${err} = ${url} - ${http_method} | ${status_code}` + '\n');
-}
+const archiveLogs = (logFilename) => {
+    const logPath = path.join(__dirname, '../../logs');
+    const backupPath = path.join(logPath, 'backup');
+    if (!fs.existsSync(backupPath)) fs.mkdirSync(backupPath);
+    const archivePath = path.join(backupPath, `${logFilename}-${dayjs().format('YYYY-MM-DD')}.zip`);
+    const archive = archiver('zip', { zlib: { level: 9 }});
+    const logStream = fs.createReadStream(path.join(logPath, logFilename));
+
+    const archiveStream = fs.createWriteStream(archivePath, { flags: 'w' });
+    archiveStream.on('close', () => {
+        // delete the original log file after archiving
+        fs.unlink(path.join(logPath, logFilename), (err) => {
+            if (err) console.error(`Error deleting ${logFilename}:`, err);
+        });
+    });
+
+    archive.pipe(archiveStream);
+    archive.append(logStream, { name: logFilename });
+    archive.finalize();
+};
 
 const saveErrorLogV2 = (log) => {
     // saving error messages to a file in the logs directory
     let errorLogStream = rfs.createStream('error.log', {
-        interval: '1d', // rotate daily
+        interval: '7d', // rotate daily
         path: path.join(__dirname, '../../logs')
     })
     if (log.isStackTrace) {
@@ -34,16 +47,18 @@ const saveErrorLogV2 = (log) => {
         // write error message with timestamp
         errorLogStream.write(`[${dayjs().format('YYYY-MM-DD HH:mm:ss')}] | [${log.level}] | false | ${log.message} | ${log.server} | ${log.urlPath} | ${log.lastHost} | ${log.method} | ${log.status}\n`);
     }
+    archiveLogs('error.log');
 }
 
 const saveLog = (log) => {
     // saving error messages to a file in the logs directory
     let accessLogStream = rfs.createStream('access.log', {
-        interval: '1d', // rotate daily
+        interval: '7d', // rotate daily
         path: path.join(__dirname, '../../logs')
     })
     // write log message with timestamp
     accessLogStream.write(`[${dayjs().format('YYYY-MM-DD HH:mm:ss')}] | [${log.level}] | ${log.message} | ${log.server} | ${log.urlPath} | ${log.lastHost} | ${log.method} | ${log.status}\n`);
+    archiveLogs('access.log');
 }
 
 const saveMorganLog = () => {
@@ -57,7 +72,6 @@ const saveMorganLog = () => {
     
 
 export default {
-    saveErrorLog,
     saveErrorLogV2,
     saveLog,
     saveMorganLog
