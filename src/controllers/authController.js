@@ -31,6 +31,19 @@ const login = async(req, res) => {
     }
 }
 
+const logout = async(req, res) => {
+    logger.saveLog({
+        level: 'ACC',
+        message: 'Logout Success for username: ' + req.body.username,
+        server: 'BACKEND',
+        urlPath: req.originalUrl,
+        lastHost: req.headers.host,
+        method: req.method,
+        status: 200
+    })
+    res.status(200).json({ message: 'You are successfully logged out' });
+}
+
 const googleOauth = async(req, res) => {
     let data = null;
     if (req.body.accessToken) {
@@ -296,6 +309,7 @@ const getAuthById = async (req, res) => {
 
 export default {
     login,
+    logout,
     googleOauth,
     verifyEmail,
     forgotPassword,

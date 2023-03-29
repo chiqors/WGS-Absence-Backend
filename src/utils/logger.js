@@ -1,4 +1,3 @@
-import rfs from 'rotating-file-stream';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import dayjs from 'dayjs';
@@ -12,32 +11,52 @@ const __dirname = path.dirname(__filename);
 dayjs.locale('id');
 
 const archiveLogs = (logFilename) => {
-    const logPath = path.join(__dirname, '../../logs');
-    const backupPath = path.join(logPath, 'backup');
-    if (!fs.existsSync(backupPath)) fs.mkdirSync(backupPath);
-    const archivePath = path.join(backupPath, `${logFilename}-${dayjs().format('YYYY-MM-DD')}.zip`);
-    const archive = archiver('zip', { zlib: { level: 9 }});
-    const logStream = fs.createReadStream(path.join(logPath, logFilename));
+    // archive logs every week or if log file > 10MB
+    const logsPath = path.join(__dirname, '../../logs');
+    const fileLogPath = path.join(logsPath, logFilename);
 
-    const archiveStream = fs.createWriteStream(archivePath, { flags: 'w' });
-    archiveStream.on('close', () => {
-        // delete the original log file after archiving
-        fs.unlink(path.join(logPath, logFilename), (err) => {
-            if (err) console.error(`Error deleting ${logFilename}:`, err);
+    if (dayjs().day() === 1) {
+        fs.stat(fileLogPath, (err, stats) => {
+            if (err) console.log(err);
+
+            const fileSizeInBytes = stats.size;
+            const fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+
+            if (dayjs().day() === 1 || fileSizeInMB > 10) {
+                const archiveFilename = `${logFilename}-${dayjs().format('YYYY-MM-DD')}.zip`;
+                const archivePath = path.join(logsPath, 'backup', archiveFilename);
+                // check if archive file not exist, create new archive file
+                if (!fs.existsSync(archivePath)) {
+                    const output = fs.createWriteStream(archivePath);
+                    const archive = archiver('zip', {
+                        zlib: { level: 9 } // Sets the compression level.
+                    });
+                    // listen for all archive data to be written
+                    output.on('close', function () {
+                        // delete file log
+                        fs.unlinkSync(accessLogPath);
+                    });
+                    // good practice to catch this error explicitly
+                    archive.on('error', function (err) {
+                        throw err;
+                    });
+                    // pipe archive data to the file
+                    archive.pipe(output);
+                    // append log file to archive file
+                    archive.file(fileLogPath, { name: logFilename });
+                    // finalize the archive (ie we are done appending files but streams have to finish yet)
+                    archive.finalize();
+                }
+            }
         });
-    });
-
-    archive.pipe(archiveStream);
-    archive.append(logStream, { name: logFilename });
-    archive.finalize();
+    }
 };
 
 const saveErrorLogV2 = (log) => {
     // saving error messages to a file in the logs directory
-    let errorLogStream = rfs.createStream('error.log', {
-        interval: '7d', // rotate daily
-        path: path.join(__dirname, '../../logs')
-    })
+    let errorLogStream = fs.createWriteStream(path.join(__dirname, '../../logs/error.log'), {
+        flags: 'a' // 'a' means appending (old data will be preserved)
+    });
     if (log.isStackTrace) {
         // Replace newline characters with a space
         const stackTraceOneLine = log.message.replace(/\n/g, ' ');
@@ -51,23 +70,21 @@ const saveErrorLogV2 = (log) => {
 }
 
 const saveLog = (log) => {
-    // saving error messages to a file in the logs directory
-    let accessLogStream = rfs.createStream('access.log', {
-        interval: '7d', // rotate daily
-        path: path.join(__dirname, '../../logs')
-    })
+    // saving access messages to a file in the logs directory
+    let accessLogStream = fs.createWriteStream(path.join(__dirname, '../../logs/access.log'), {
+        flags: 'a' // 'a' means appending (old data will be preserved)
+    });
     // write log message with timestamp
     accessLogStream.write(`[${dayjs().format('YYYY-MM-DD HH:mm:ss')}] | [${log.level}] | ${log.message} | ${log.server} | ${log.urlPath} | ${log.lastHost} | ${log.method} | ${log.status}\n`);
     archiveLogs('access.log');
 }
 
 const saveMorganLog = () => {
-    // saving access messages to a file
-    let accessLogStream = rfs.createStream('morgan.log', {
-        interval: '1d', // rotate daily
-        path: path.join(__dirname, '../../logs')
-    })
-    return accessLogStream;
+    // saving morgan messages to a file
+    let morganLogStream = fs.createWriteStream(path.join(__dirname, '../../logs/morgan.log'), {
+        flags: 'a' // 'a' means appending (old data will be preserved)
+    });
+    return morganLogStream;
 }
     
 

@@ -98,9 +98,20 @@ const getAttendanceStatus = async(employee_id) => {
                 gte: new Date(new Date().setHours(0, 0, 0, 0))
             }
         },
+        select: {
+            time_in: true,
+            time_out: true,
+            duty: {
+                select: {
+                    name: true,
+                    status: true
+                }
+            }
+        },
         orderBy: {
             id: 'desc'
-        }
+        },
+        take: 1
     }).finally(async() => {
         await prisma.$disconnect()
     })

@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.get("/auth/:id", authController.getAuthById);
 router.post("/login", authController.login);
+router.post("/logout", authController.logout);
 router.get("/verify", authController.verifyEmail);
 router.post("/oauth/google/login", authController.googleOauth);
 router.post("/oauth/google/link", authController.googleOauthLink);

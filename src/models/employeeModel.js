@@ -110,6 +110,8 @@ const checkGoogleOauth = async (data) => {
                     id: true,
                     account: {
                         select: {
+                            id: true,
+                            username: true,
                             role: true
                         }
                     }
@@ -123,7 +125,9 @@ const checkGoogleOauth = async (data) => {
     if (oauthAccount) {
         // generate new token
         const payload = {
-            id: oauthAccount.id,
+            id: oauthAccount.employee.account.id,
+            username: oauthAccount.employee.account.username,
+            oauth_id: oauthAccount.id,
             employee_id: oauthAccount.employee.id,
             role: oauthAccount.employee.account.role
         };
