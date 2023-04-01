@@ -210,47 +210,30 @@ const googleOauthLink = async (req, res) => {
 }
 
 const googleOauthUnlink = async (req, res) => {
-    const values = {
-        employee_id: parseInt(req.body.employee_id)
-    }
     try {
-        await Employee.googleOauthUnlink(values.employee_id);
-        try {
-            await Employee.googleOauthUnlink(values.employee_id);
-            logger.saveLog({
-                level: 'ACC',
-                message: 'Google Account has been unlinked for Employee ID: ' + values.employee_id,
-                server: 'BACKEND',
-                urlPath: req.originalUrl,
-                lastHost: req.headers.host,
-                method: req.method,
-                status: 200
-            })
-            res.status(200).json({ message: 'Google Account has been unlinked' });
-        } catch (err) {
-            logger.saveErrorLogV2({
-                level: 'ERR',
-                isStackTrace: true,
-                message: err.message,
-                server: 'BACKEND',
-                urlPath: req.originalUrl,
-                lastHost: req.headers.host,
-                method: req.method,
-                status: 500
-            })
-            res.status(500).json({ message: 'Internal Server Error' });
-        }
+        await Employee.googleOauthUnlink(req.body.oauth_id);
+        logger.saveLog({
+            level: 'ACC',
+            message: 'Google Account has been unlinked for Employee ID: ' + values.employee_id,
+            server: 'BACKEND',
+            urlPath: req.originalUrl,
+            lastHost: req.headers.host,
+            method: req.method,
+            status: 200
+        })
+        res.status(200).json({ message: 'Google Account has been unlinked' });
     } catch (err) {
+        console.log(err.message);
         logger.saveErrorLogV2({
             level: 'ERR',
-            message: err.message,
+            message: 'Google Account Unlink Failed',
             server: 'BACKEND',
             urlPath: req.originalUrl,
             lastHost: req.headers.host,
             method: req.method,
             status: 500
         })
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(500).json({ message: 'Google Account Unlink Failed' });
     }
 }
 
