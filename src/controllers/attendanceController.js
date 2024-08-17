@@ -30,7 +30,7 @@ const checkIn = async(req, res) => {
         })
         res.json(data);
     } else {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             message: 'Failed to create attendance with check in for employee ID: ' + req.body.employee_id,
             server: 'BACKEND',
@@ -63,7 +63,7 @@ const checkOut = async(req, res) => {
         })
         res.json(data);
     } else {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             message: 'Failed to update attendance with check out for employee ID: ' + req.body.employee_id,
             server: 'BACKEND',

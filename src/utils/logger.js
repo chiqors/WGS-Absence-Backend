@@ -52,7 +52,7 @@ const archiveLogs = (logFilename) => {
     }
 };
 
-const saveErrorLogV2 = (log) => {
+const saveErrorLog = (log) => {
     // saving error messages to a file in the logs directory
     let errorLogStream = fs.createWriteStream(path.join(__dirname, '../../logs/error.log'), {
         flags: 'a' // 'a' means appending (old data will be preserved)
@@ -89,7 +89,7 @@ const saveMorganLog = () => {
     
 
 export default {
-    saveErrorLogV2,
+    saveErrorLog,
     saveLog,
     saveMorganLog
 };

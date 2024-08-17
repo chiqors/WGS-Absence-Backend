@@ -11,7 +11,7 @@ const getDashboardCards = async(req, res) => {
             }
         });
     } catch (err) {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             isStackTrace: true,
             message: err.message,
@@ -34,7 +34,7 @@ const getTopAttendance = async(req, res) => {
                 return res.status(404).send('Not found');
             }
         }).catch((error) => {
-            logger.saveErrorLogV2({
+            logger.saveErrorLog({
                 level: 'ERR',
                 isStackTrace: true,
                 message: error.message,
@@ -47,7 +47,7 @@ const getTopAttendance = async(req, res) => {
             return res.status(500).send('Internal server error');
         });
     } catch (err) {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             isStackTrace: true,
             message: err.message,
@@ -70,7 +70,7 @@ const getGraphAveragePresence = async(req, res) => {
                 return res.status(404).send('Not found');
             }
         }).catch((error) => {
-            logger.saveErrorLogV2({
+            logger.saveErrorLog({
                 level: 'ERR',
                 isStackTrace: true,
                 message: error.message,
@@ -83,7 +83,7 @@ const getGraphAveragePresence = async(req, res) => {
             return res.status(500).send('Internal server error');
         });
     } catch (err) {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             isStackTrace: true,
             message: err.message,

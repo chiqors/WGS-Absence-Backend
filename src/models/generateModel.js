@@ -494,7 +494,7 @@ export const generateInsertErrorLogQuery = async() => {
     ]
     // write and save to error log file
     errorLogs.forEach((errorLog) => {
-        logger.saveErrorLogV2(errorLog)
+        logger.saveErrorLog(errorLog)
     })
 }
 

@@ -20,7 +20,7 @@ const getAllDutyNotAssignedWithJobId = async(req, res) => {
     if (data) {
         res.json(data);
     } else {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             message: 'Duty Not Assigned With Job cannot be found',
             server: 'BACKEND',
@@ -48,7 +48,7 @@ const store = async(req, res) => {
         })
         return res.status(201).json({ message: 'Duty created' });
     } catch (error) {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             isStackTrace: true,
             message: error.message,
@@ -89,7 +89,7 @@ const update = async(req, res) => {
         })
         return res.status(201).json({ message: 'Duty updated' });
     } catch (error) {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             isStackTrace: true,
             message: error.message,

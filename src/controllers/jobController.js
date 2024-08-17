@@ -24,7 +24,7 @@ const store = async(req, res) => {
         })
         return res.status(201).json({ message: 'Job created' });
     } catch (err) {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             isStackTrace: true,
             message: err.message,
@@ -58,7 +58,7 @@ const update = async(req, res) => {
         })
         return res.status(200).json({ message: 'Job updated' });
     } catch (err) {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             isStackTrace: true,
             message: err.message,
@@ -86,7 +86,7 @@ const destroy = async(req, res) => {
         })
         return res.status(201).json({ message: 'Job deleted' });
     } catch (err) {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             isStackTrace: true,
             message: err.message,

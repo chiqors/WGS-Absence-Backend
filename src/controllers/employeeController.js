@@ -32,7 +32,7 @@ const index = async(req, res) => {
 const store = async(req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             message: 'Validation Error on Create Employee',
             server: 'BACKEND',
@@ -54,7 +54,7 @@ const store = async(req, res) => {
         req.body.photo_url = "https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/581.jpg"
     }
     const token = await Employee.storeEmployee(req.body).catch((err) => {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             isStackTrace: true,
             message: err.message,
@@ -85,7 +85,7 @@ const store = async(req, res) => {
         })
         return res.status(201).json({ message: 'submitted' });
     } catch (err) {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             isStackTrace: true,
             message: err.message,
@@ -115,7 +115,7 @@ const update = async(req, res) => {
     const paramsId = parseInt(req.params.id);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             message: 'Validation Error on Update Employee',
             server: 'BACKEND',
@@ -160,7 +160,7 @@ const update = async(req, res) => {
     req.body.birthdate = new Date(req.body.birthdate);
     req.body.job_id = parseInt(req.body.job_id);
     await Employee.updateEmployee(req.body).catch((err) => {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             isStackTrace: true,
             message: err.message,
@@ -191,7 +191,7 @@ const destroy = async(req, res) => {
         const username = data.account.username;
         if (fs.existsSync(`public/uploads/${username}`)) {
             fs.rm(`public/uploads/${username}`, { recursive: true });
-            logger.saveErrorLogV2({
+            logger.saveErrorLog({
                 level: 'ACC',
                 message: 'Employee Avatar and Folder Deleted for ID: ' + paramsId,
                 server: 'BACKEND',
@@ -216,7 +216,7 @@ const destroy = async(req, res) => {
                 return res.status(201).json({ message: 'deleted' });
             })
             .catch((err) => {
-                logger.saveErrorLogV2({
+                logger.saveErrorLog({
                     level: 'ERR',
                     isStackTrace: true,
                     message: err.message,
@@ -229,7 +229,7 @@ const destroy = async(req, res) => {
                 return res.status(500).json({ message: 'Internal Server Error' });
             });
     } else {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             message: 'Employee not found for ID: ' + paramsId,
             server: 'BACKEND',
@@ -247,7 +247,7 @@ const getAllJobsForSelect = async(req, res) => {
     if (data) {
         res.json(data);
     } else {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             message: 'Job not found',
             server: 'BACKEND',

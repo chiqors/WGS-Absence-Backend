@@ -18,7 +18,7 @@ const login = async(req, res) => {
         })
         res.status(200).json({ message: 'You are successfully logged in', token: data  });
     } else {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             message: 'Username or password is incorrect',
             server: 'BACKEND',
@@ -74,7 +74,7 @@ const googleOauth = async(req, res) => {
         })
         res.status(200).json({ message: 'You are successfully logged in', token: data  });
     } else {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             message: 'Google Oauth Failed',
             server: 'BACKEND',
@@ -101,7 +101,7 @@ const verifyEmail = async (req, res) => {
         })
         res.redirect(`${FRONTEND_URL}/login`);
     }).catch((err) => {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             isStackTrace: true,
             message: err.message,
@@ -129,7 +129,7 @@ const forgotPassword = async (req, res) => {
         })
         res.status(200).json({ message: 'Please check your email to reset your password' });
     } else {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             message: 'Email is not registered',
             server: 'BACKEND',
@@ -156,7 +156,7 @@ const resetPassword = async (req, res) => {
         })
         res.status(200).json({ message: 'Your password has been changed' });
     } else {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             message: 'Token is invalid: ' + req.body.token,
             server: 'BACKEND',
@@ -195,7 +195,7 @@ const googleOauthLink = async (req, res) => {
         })
         res.status(200).json({ message: 'Google Account has been linked' });
     } catch (err) {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             isStackTrace: true,
             message: err.message,
@@ -224,7 +224,7 @@ const googleOauthUnlink = async (req, res) => {
         res.status(200).json({ message: 'Google Account has been unlinked' });
     } catch (err) {
         console.log(err.message);
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             message: 'Google Account Unlink Failed',
             server: 'BACKEND',
@@ -246,7 +246,7 @@ const googleOauthData = async (req, res) => {
         if (data) {
             res.status(200).json({ data });
         } else {
-            logger.saveErrorLogV2({
+            logger.saveErrorLog({
                 level: 'ERR',
                 message: 'Oauth Data Not Found',
                 server: 'BACKEND',
@@ -258,7 +258,7 @@ const googleOauthData = async (req, res) => {
             res.status(200).json({ data: null });
         }
     } catch (err) {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             isStackTrace: true,
             message: err.message,
@@ -277,7 +277,7 @@ const getAuthById = async (req, res) => {
     if (data) {
         res.status(200).json({ data });
     } else {
-        logger.saveErrorLogV2({
+        logger.saveErrorLog({
             level: 'ERR',
             message: 'Internal Server Error',
             server: 'BACKEND',
