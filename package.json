@@ -6,6 +6,7 @@
   "scripts": {
     "start": "nodemon app.js",
     "dev": "nodemon app.js",
+    "prisma:migrate-dev": "pnpx prisma migrate dev --name init",
     "prisma:generate": "pnpx prisma generate",
     "start:ngrok": "pnpm ngrok-start",
     "ngrok-start": "echo \"Don't forget to copy the urls. The command will be run in a few seconds...\" && pnpm ngrok-start:wait && pnpm ngrok-start:run",

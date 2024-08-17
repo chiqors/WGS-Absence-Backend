@@ -1,4 +1,4 @@
-# Frontend React App for WGS Absence
+# Backend App for WGS Absence
 
 Please note that the frontend is on a separate repository. You can find it [here](https://github.com/chiqors/WGS-Absence-Frontend).
 
@@ -57,19 +57,27 @@ git clone https://github.com/chiqors/wgs-absence-backend.git
 pnpm install
 ```
 
-#### 4. Generate Prisma Client
+#### 4. Do Prisma Migration
+
+```bash
+pnpm prisma:prisma:migrate-dev
+```
+
+#### 5. Generate Prisma Client
 
 ```bash
 pnpm prisma:generate
 ```
 
-#### 5. Run the project
+#### 6. Create the morgan log file at `logs/morgan.log`
+
+#### 7. Run the project
 
 ```bash
 pnpm dev
 ```
 
-#### 6. (Optional) Run NGROK for internal testing
+#### 8. (Optional) Run NGROK for internal testing
 
 ```bash
 pnpm start:ngrok
